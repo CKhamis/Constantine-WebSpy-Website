@@ -8,7 +8,11 @@ use crate::util::template_config::template_validity;
 #[get("/")]
 pub async fn hello(db: web::Data<AppState>) -> impl Responder {
     find_all(&db.conn).await;
-    HttpResponse::Ok().body("Hello world!")
+    let mut reg = Handlebars::new();
+    //HttpResponse::Ok().body("Hello world!")
+    template_validity(reg.render_template(
+        include_str!("../../resources/template/main/Index.html"),
+        &json!({"header": include_str!("../../resources/template/components/Header.html"), "logs": "rat>>>>>"})))
 }
 
 #[post("/echo")]
