@@ -3,6 +3,8 @@ use std::env;
 use actix_web::{App, HttpServer, web};
 use sea_orm::{Database, DatabaseConnection};
 use webspy::controller::controller_prelude::*;
+use webspy::controller::report_controller::report_request;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // todo: make env vars to work
@@ -13,10 +15,11 @@ async fn main() -> std::io::Result<()> {
 
     let connection = Database::connect("mysql://root:1234@localhost/web_spy").await.unwrap();
     let app_state = AppState{ conn: connection };
-
+    println!("terce");
     HttpServer::new(move || {
         App::new()
             .service(hello)
+            .route("/report", web::post().to(report_request))
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
             .app_data(web::Data::new(app_state.clone()))
