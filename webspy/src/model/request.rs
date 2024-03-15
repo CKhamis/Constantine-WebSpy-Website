@@ -5,8 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveEntityModel)]
 #[sea_orm(table_name = "request")]
 pub struct Model{
-    #[sea_orm(primary_key)]
-    #[sea_orm(column_type = "Integer")]
+    #[sea_orm(primary_key, auto_increment = true)]
     pub id:i32,
     #[sea_orm(column_type = "Text")]
     pub ip:String,
@@ -34,6 +33,8 @@ pub struct Model{
     pub request_protocol:String,
     #[sea_orm(column_type = "Text")]
     pub request_scheme:String,
+    #[sea_orm(column_type = "Timestamp")]
+    pub timestamp:DateTimeLocal,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
