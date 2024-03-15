@@ -1,10 +1,13 @@
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use handlebars::{Handlebars, RenderError};
 use serde_json::json;
+use crate::service::AppState;
+use crate::service::log_service::find_all;
 use crate::util::template_config::template_validity;
 
 #[get("/")]
-pub async fn hello() -> impl Responder {
+pub async fn hello(db: web::Data<AppState>) -> impl Responder {
+    find_all(&db.conn).await;
     HttpResponse::Ok().body("Hello world!")
 }
 
