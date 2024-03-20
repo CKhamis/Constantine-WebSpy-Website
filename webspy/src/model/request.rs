@@ -35,10 +35,31 @@ pub struct Model{
     pub request_scheme:String,
     #[sea_orm(column_type = "Timestamp")]
     pub timestamp:DateTimeLocal,
+    #[sea_orm(column_type = "Uuid")]
+    pub domain_id: Uuid,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
 
 // helpful info: https://docs.rs/sea-orm/0.12.14/sea_orm/derive.DeriveRelation.html
-#[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
-pub enum Relation {}
+#[derive(Copy, Clone, Debug, EnumIter)]
+pub enum Relation {
+    Domain,
+}
+
+impl RelationTrait for Relation {
+    fn def(&self) -> RelationDef {
+        match self {
+            Self::Domain => Entity::belongs_to(super::domain::Entity)
+                .from(Column::DomainId)
+                .to(super::domain::Column::Id)
+                .into(),
+        }
+    }
+}
+
+impl Related<super::domain::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Domain.def()
+    }
+}

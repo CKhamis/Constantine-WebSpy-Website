@@ -1,6 +1,7 @@
 use actix_web::web;
 use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, DbErr, EntityTrait};
 use sqlx::types::chrono::Local;
+use uuid::Uuid;
 use crate::data_transfer_object::report::Report;
 use crate::model::request;
 use crate::model::request::{Model as Log, Model};
@@ -11,7 +12,7 @@ pub async fn find_all(conn: &DatabaseConnection){
     println!("{:?}", logs);
 }
 
-pub async fn save_request(report: web::Json<Report>, db: web::Data<AppState>) -> Result<Model, DbErr> {
+pub async fn save_request(report: &web::Json<Report>, db: web::Data<AppState>) -> Result<Model, DbErr> {
     let incoming_request = crate::model::request::ActiveModel{
         id: ActiveValue::NotSet,
         ip: ActiveValue::Set(report.ip.to_string()),
@@ -28,6 +29,7 @@ pub async fn save_request(report: web::Json<Report>, db: web::Data<AppState>) ->
         request_protocol: ActiveValue::Set(report.request_protocol.to_string()),
         request_scheme: ActiveValue::Set(report.request_scheme.to_string()),
         timestamp: ActiveValue::Set(Local::now()),
+        domain_id: ActiveValue::Set(Uuid::new_v4()),
     };
     incoming_request.insert(&db.conn).await
 }
