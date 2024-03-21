@@ -3,6 +3,7 @@ use std::env;
 use actix_web::{App, HttpServer, web};
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema};
 use webspy::controller::controller_prelude::*;
+use webspy::controller::domain_controller::new_domain;
 use webspy::controller::report_controller::report_request;
 use webspy::model::{domain, request};
 
@@ -21,7 +22,7 @@ async fn main() -> std::io::Result<()> {
     let schema = Schema::new(builder);
     let domain_table = builder.build(&schema.create_table_from_entity(domain::Entity));
     match connection.execute(domain_table).await{
-        Ok(_) => {println!("Table request exists. Using")}
+        Ok(_) => {println!("Creating new table: domain");}
         Err(e) => {
             // Crash program if table could not be created if not exists
             assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"));
@@ -29,7 +30,7 @@ async fn main() -> std::io::Result<()> {
     }
     let request_table = builder.build(&schema.create_table_from_entity(request::Entity));
     match connection.execute(request_table).await{
-        Ok(_) => {println!("Table request exists. Using")}
+        Ok(_) => {println!("Creating new table: request");}
         Err(e) => {
             // Crash program if table could not be created if not exists
             assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"));
@@ -43,6 +44,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello)
             .route("/report", web::post().to(report_request))
             .service(echo)
+            .service(new_domain)
             .route("/hey", web::get().to(manual_hello))
             .app_data(web::Data::new(app_state.clone()))
     })

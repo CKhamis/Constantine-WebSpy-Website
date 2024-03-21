@@ -2,7 +2,7 @@ use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use handlebars::{Handlebars, RenderError};
 use serde_json::json;
 use crate::service::AppState;
-use crate::service::request_service::find_all;
+use crate::service::report_service::find_all;
 use crate::util::template_config::template_validity;
 
 #[get("/")]

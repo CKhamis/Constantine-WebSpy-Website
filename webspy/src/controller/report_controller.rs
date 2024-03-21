@@ -6,7 +6,7 @@ use sqlx::types::chrono::Local;
 use crate::data_transfer_object::report::Report;
 use crate::model::request::Model;
 use crate::service::AppState;
-use crate::service::request_service::save_request;
+use crate::service::report_service::save_request;
 
 //#[post("/report")] todo: check if I can uncomment this for consistency
 pub async fn report_request(report: web::Json<Report>, db: web::Data<AppState>) -> impl Responder {

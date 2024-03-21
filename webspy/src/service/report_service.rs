@@ -4,7 +4,7 @@ use sqlx::types::chrono::Local;
 use uuid::Uuid;
 use crate::data_transfer_object::report::Report;
 use crate::model::request;
-use crate::model::request::{Model as Log, Model};
+use crate::model::request::{Model};
 use crate::service::AppState;
 
 pub async fn find_all(conn: &DatabaseConnection){

@@ -1,5 +1,6 @@
 use sea_orm::DatabaseConnection;
-pub mod request_service;
+pub mod report_service;
+pub mod domain_service;
 
 #[derive(Debug, Clone)]
 pub struct AppState {
