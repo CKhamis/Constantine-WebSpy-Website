@@ -17,5 +17,5 @@ pub async fn save_domain(new_domain: &web::Json<NewDomain>, db: web::Data<AppSta
 }
 
 pub async fn get_domains(db: web::Data<AppState>) -> Vec<domain::Model> {
-    domain::Entity::find().all(&db).await.unwrap()
+    domain::Entity::find().all(&db.conn).await.unwrap()
 }

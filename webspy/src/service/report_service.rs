@@ -12,7 +12,7 @@ pub async fn find_all(conn: &DatabaseConnection){
     println!("{:?}", logs);
 }
 
-pub async fn save_request(report: &web::Json<Report>, db: web::Data<AppState>) -> Result<Model, DbErr> {
+pub async fn save_request(report: &web::Json<Report>, db: &web::Data<AppState>) -> Result<Model, DbErr> {
     let incoming_request = crate::model::request::ActiveModel{
         id: ActiveValue::NotSet,
         ip: ActiveValue::Set(report.ip.to_string()),

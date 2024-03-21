@@ -2,10 +2,11 @@ use webspy::service::AppState;
 use std::env;
 use actix_web::{App, HttpServer, web};
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema};
+use webspy::controller::ban_controller::new_ban;
 use webspy::controller::controller_prelude::*;
-use webspy::controller::domain_controller::new_domain;
+use webspy::controller::domain_controller::{all_domains, new_domain};
 use webspy::controller::report_controller::report_request;
-use webspy::model::{domain, request};
+use webspy::model::{ban, domain, request};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -26,7 +27,7 @@ async fn main() -> std::io::Result<()> {
         Err(e) => {
             // Crash program if table could not be created if not exists
             println!("{}", e);
-            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"));
+            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
         }
     }
     let request_table = builder.build(&schema.create_table_from_entity(request::Entity));
@@ -34,7 +35,15 @@ async fn main() -> std::io::Result<()> {
         Ok(_) => {println!("Creating new table: request");}
         Err(e) => {
             // Crash program if table could not be created if not exists
-            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"));
+            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
+        }
+    }
+    let ban_table = builder.build(&schema.create_table_from_entity(ban::Entity));
+    match connection.execute(ban_table).await{
+        Ok(_) => {println!("Creating new table: ban");}
+        Err(e) => {
+            // Crash program if table could not be created if not exists
+            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
         }
     }
 
@@ -43,9 +52,11 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .service(hello)
-            .route("/report", web::post().to(report_request))
             .service(echo)
             .service(new_domain)
+            .service(all_domains)
+            .service(report_request)
+            .service(new_ban)
             .route("/hey", web::get().to(manual_hello))
             .app_data(web::Data::new(app_state.clone()))
     })

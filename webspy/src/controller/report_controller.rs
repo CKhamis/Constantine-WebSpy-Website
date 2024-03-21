@@ -1,16 +1,15 @@
+use actix_web::http::header::ContentType;
 use actix_web::{HttpResponse, post, Responder, web};
-use handlebars::Handlebars;
-use sea_orm::{ActiveModelTrait, ActiveValue, DbErr};
-use sea_orm::sea_query::ColumnSpec::Default;
 use sqlx::types::chrono::Local;
+use crate::data_transfer_object::ban_response::BanResponse;
 use crate::data_transfer_object::report::Report;
-use crate::model::request::Model;
 use crate::service::AppState;
+use crate::service::ban_service::ban_check;
 use crate::service::report_service::save_request;
 
-//#[post("/report")] todo: check if I can uncomment this for consistency
+#[post("/report")]
 pub async fn report_request(report: web::Json<Report>, db: web::Data<AppState>) -> impl Responder {
-    match save_request(&report, db).await{
+    match save_request(&report, &db).await{
         Ok(a) => {
             println!("{:?}", a);
         }
@@ -19,7 +18,41 @@ pub async fn report_request(report: web::Json<Report>, db: web::Data<AppState>) 
         }
     }
 
+    match ban_check(&report.ip, &db).await{
+        None => {
+            // ban does not exist
+            let best_response = BanResponse{
+                is_blocked: false,
+                message: "User is not banned.".to_string(),
+                expire: Local::now()
+            };
 
-    println!("{:?}", report.request_url);
-    HttpResponse::Ok().body("Hey there!")
+            let ser_response = serde_json::to_string(&best_response).unwrap();
+            HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
+        }
+        Some(ban) => {
+            // ban exists
+            if ban.expire > Local::now(){
+                // user is banned
+                let bad_response = BanResponse{
+                    is_blocked: true,
+                    message: ban.reason,
+                    expire: ban.expire
+                };
+
+                let ser_response = serde_json::to_string(&bad_response).unwrap();
+                HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
+            }else{
+                // user has been banned in the past, but is not anymore
+                let ok_response = BanResponse{
+                    is_blocked: false,
+                    message: format!("User is not banned anymore. Old reason: {}", ban.reason),
+                    expire: ban.expire
+                };
+
+                let ser_response = serde_json::to_string(&ok_response).unwrap();
+                HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
+            }
+        }
+    }
 }

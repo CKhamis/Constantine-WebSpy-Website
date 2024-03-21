@@ -14,6 +14,7 @@ sqlx = "0.7.4"
 sea-orm = {version = "0.12.9", features = ["sqlx-mysql", "runtime-actix", "runtime-actix-native-tls"]}
 handlebars = "5.1.0"
 uuid = {version = "1.8.0", features=["v4", "fast-rng"]}
+chrono = {version = "0.4.35", features = ["serde"]}
 #futures = "0.3.30"
 #futures-executor = "0.3.30"
 #futures-util = "0.3.30"
