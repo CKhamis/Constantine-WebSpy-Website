@@ -25,6 +25,7 @@ async fn main() -> std::io::Result<()> {
         Ok(_) => {println!("Creating new table: domain");}
         Err(e) => {
             // Crash program if table could not be created if not exists
+            println!("{}", e);
             assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"));
         }
     }

@@ -8,8 +8,8 @@ use uuid::Uuid;
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveEntityModel)]
 #[sea_orm(table_name = "domain")]
 pub struct Model{
-    #[sea_orm(primary_key, auto_increment = false, column_type = "Uuid")]
-    pub id:Uuid,
+    #[sea_orm(primary_key, auto_increment = false)]
+    pub id:u64,
     #[sea_orm(column_type = "Text")]
     pub name:String,
     #[sea_orm(column_type = "Text")]

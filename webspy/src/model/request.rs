@@ -35,8 +35,7 @@ pub struct Model{
     pub request_scheme:String,
     #[sea_orm(column_type = "Timestamp")]
     pub timestamp:DateTimeLocal,
-    #[sea_orm(column_type = "Uuid")]
-    pub domain_id: Uuid,
+    pub domain_id: u64,
 }
 
 impl ActiveModelBehavior for ActiveModel {}

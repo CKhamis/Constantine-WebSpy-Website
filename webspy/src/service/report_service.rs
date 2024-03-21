@@ -29,7 +29,9 @@ pub async fn save_request(report: &web::Json<Report>, db: web::Data<AppState>) -
         request_protocol: ActiveValue::Set(report.request_protocol.to_string()),
         request_scheme: ActiveValue::Set(report.request_scheme.to_string()),
         timestamp: ActiveValue::Set(Local::now()),
-        domain_id: ActiveValue::Set(Uuid::new_v4()),
+        domain_id: ActiveValue::Set(report.domain_id),
     };
+
+
     incoming_request.insert(&db.conn).await
 }
