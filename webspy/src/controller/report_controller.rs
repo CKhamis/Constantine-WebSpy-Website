@@ -9,9 +9,10 @@ use crate::service::report_service::save_request;
 
 #[post("/report")]
 pub async fn report_request(report: web::Json<Report>, db: web::Data<AppState>) -> impl Responder {
+    println!("/report received request");
     match save_request(&report, &db).await{
         Ok(a) => {
-            println!("{:?}", a);
+            //println!("{:?}", a);
         }
         Err(a) => {
             println!("{}", a);

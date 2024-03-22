@@ -4,6 +4,7 @@ use sea_orm::{ActiveModelBehavior, DeriveEntityModel, DeriveRelation, EntityTrai
 use sea_orm::prelude::DateTimeLocal;
 use serde::{Deserialize, Serialize};
 
+//todo: ask cory about making columns use varchar
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveEntityModel)]
 #[sea_orm(table_name = "ban")]
 pub struct Model{
