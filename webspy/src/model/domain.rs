@@ -20,7 +20,7 @@ pub struct Model{
 
 impl ActiveModelBehavior for ActiveModel {}
 
-#[derive(Copy, Clone, Debug, EnumIter)]
+#[derive(Copy, Clone, Debug, EnumIter, Deserialize, Serialize)]
 pub enum Relation {
     Request,
 }

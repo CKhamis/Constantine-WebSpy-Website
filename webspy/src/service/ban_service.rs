@@ -12,6 +12,10 @@ pub async fn ban_check(ip:&String, db: &web::Data<AppState>) -> Option<Model> {
     ban::Entity::find().filter(ban::Column::Ip.contains(ip)).one(&db.conn).await.unwrap_or(None)
 }
 
+pub async fn get_bans(db: &web::Data<AppState>) -> Vec<ban::Model> {
+    ban::Entity::find().all(&db.conn).await.unwrap()
+}
+
 pub async fn save_ban(new_ban: &web::Json<NewBan>, db: &web::Data<AppState>) -> Result<ban::Model, DbErr> {
     let constructed_model = crate::model::ban::ActiveModel{
         id: ActiveValue::Set(Local::now().timestamp().unsigned_abs()),

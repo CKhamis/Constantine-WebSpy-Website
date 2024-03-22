@@ -1,16 +1,17 @@
 use actix_web::{get, HttpResponse, post, Responder, web};
+use actix_web::http::header::ContentType;
 use sea_orm::DbErr;
 use crate::data_transfer_object::new_ban::NewBan;
 use crate::model::ban::Model;
 use crate::service::{AppState, ban_service};
-use crate::service::ban_service::save_ban;
+use crate::service::ban_service::{get_bans, save_ban};
 use crate::service::domain_service::get_domains;
 
 #[get("/ban/all")]
 pub async  fn all_bans(db: web::Data<AppState>) -> impl Responder{
-    let current_domains = get_domains(db).await;
-    match serde_json::to_string(&current_domains){
-        Ok(response) => {HttpResponse::Ok().body(response)}
+    let current_bans = get_bans(&db).await;
+    match serde_json::to_string(&current_bans){
+        Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
         Err(_) => {HttpResponse::BadRequest().body("All domains could not be serialized")}
     }
 }
