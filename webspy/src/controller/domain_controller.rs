@@ -4,7 +4,7 @@ use crate::data_transfer_object::new_domain::NewDomain;
 use crate::service::AppState;
 use crate::service::domain_service::{get_domains, save_domain};
 
-#[post("/domain/new")]
+#[post("/api/domain/new")]
 pub async fn new_domain(new_domain: web::Json<NewDomain>, db: web::Data<AppState>) -> impl Responder {
     match save_domain(&new_domain, db).await{
         Ok(a) => {
@@ -18,7 +18,7 @@ pub async fn new_domain(new_domain: web::Json<NewDomain>, db: web::Data<AppState
     }
 }
 
-#[get("/domain/all")]
+#[get("/api/domain/all")]
 pub async  fn all_domains(db: web::Data<AppState>) -> impl Responder{
     let current_domains = get_domains(db).await;
     match serde_json::to_string(&current_domains){

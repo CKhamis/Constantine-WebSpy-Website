@@ -4,8 +4,56 @@
 <body class="bg-body" data-bs-theme="dark">
 {{> navigation}}
 <h1>Hello, world!</h1>
+<div id="domain-container">
 
-
+</div>
+{{> footer}}
 {{> scripts}}
+<script>
+    let domainList;
+
+    refresh();
+    function refresh(){
+        const contentFetch = fetch("/api/domain/all");
+
+        Promise.all([contentFetch])
+                .then(responses => {
+                    const response1 = checkStatus(responses[0]);
+
+                    return Promise.all([response1]);
+                })
+                .then(data => {
+                    let response1 = data[0].json();
+
+                    return Promise.all([response1]);
+                })
+                .then(data => {
+                    domainList = data[0];
+                    renderDomains();
+                })
+                .catch((response)=>{
+                    console.log(response);
+                    response.json()
+                            .then(errorData => {
+                                console.log(errorData);
+                            })
+                            .catch(error => {
+                                console.error("Error parsing error response:", error);
+                            });
+                });
+    }
+    function renderDomains(){
+        let container = document.querySelector("#domain-container");
+        let htmlContent = `<ul>`;
+        domainList.forEach((domain) => {
+            let htmlDomain = `
+                <li><a href="/domains/${domain.id}">${domain.url}</a></li>
+            `;
+            htmlContent+= htmlDomain;
+        });
+        htmlContent += `</ul>`;
+        container.innerHTML = htmlContent;
+    }
+</script>
 </body>
 </html>

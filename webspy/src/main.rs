@@ -63,6 +63,7 @@ async fn main() -> std::io::Result<()> {
             .service(report_request)
             .service(new_ban)
             .service(all_bans)
+            .service(actix_files::Files::new("/static", "./webspy/resources/static"))
             .route("/hey", web::get().to(manual_hello))
             .app_data(web::Data::new(app_state.clone()))
     })
