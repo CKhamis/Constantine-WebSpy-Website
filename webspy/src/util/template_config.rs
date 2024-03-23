@@ -16,6 +16,8 @@ pub fn template_resources(){
 
     reg.register_template_string("home", include_str!("../../resources/template/main/Index.hbs"))
         .expect("home file not found");
+    reg.register_template_string("dashboard", include_str!("../../resources/template/main/Dashboard.hbs"))
+        .expect("home file not found");
 }
 
 pub fn template_validity(input:Result<String, RenderError>) -> impl Responder {

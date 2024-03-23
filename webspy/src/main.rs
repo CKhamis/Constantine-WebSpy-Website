@@ -56,7 +56,8 @@ async fn main() -> std::io::Result<()> {
     println!("//////////// Constantine WebSpy //////////////");
     HttpServer::new(move || {
         App::new()
-            .service(hello)
+            .service(index)
+            .service(dashboard)
             .service(echo)
             .service(new_domain)
             .service(all_domains)

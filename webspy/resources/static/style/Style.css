@@ -1,0 +1,16 @@
+.banner-logo {
+    width: 50%;
+    transform: translate(-50%, 0%);
+    left: 50%;
+    position: relative;
+    display: inline-block;
+}
+
+.banner-video {
+    width: 100%;
+    opacity: .5;
+}
+
+ul {
+    list-style-type: none;
+}

@@ -3,57 +3,21 @@
 {{> header}}
 <body class="bg-body" data-bs-theme="dark">
 {{> navigation}}
-<h1>Hello, world!</h1>
-<div id="domain-container">
-
+<div class="p-0 m-0 overflow-hidden">
+    <div class="container-fluid p-0 overflow-hidden bg-black" style="height:600px">
+        <div class="position-absolute px-5" style="z-index:1;height:600px; width:100%">
+            <div class="container-fluid" style="margin-top:200px;">
+                <img src="/static/icons/WS White.svg" class="img-fluid mb-2 banner-logo" />
+                <p class="col-md-8 fs-5 text-white text-center w-100">Version {{version}}</p>
+            </div>
+        </div>
+        <video class="banner-video" autoplay preload="true" loop="loop" muted>
+            <source src="https://costionline.com/videos/banners/Costi Online Home Banner.m4v" type="video/mp4">
+            video not supported
+        </video>
+    </div>
 </div>
 {{> footer}}
 {{> scripts}}
-<script>
-    let domainList;
-
-    refresh();
-    function refresh(){
-        const contentFetch = fetch("/api/domain/all");
-
-        Promise.all([contentFetch])
-                .then(responses => {
-                    const response1 = checkStatus(responses[0]);
-
-                    return Promise.all([response1]);
-                })
-                .then(data => {
-                    let response1 = data[0].json();
-
-                    return Promise.all([response1]);
-                })
-                .then(data => {
-                    domainList = data[0];
-                    renderDomains();
-                })
-                .catch((response)=>{
-                    console.log(response);
-                    response.json()
-                            .then(errorData => {
-                                console.log(errorData);
-                            })
-                            .catch(error => {
-                                console.error("Error parsing error response:", error);
-                            });
-                });
-    }
-    function renderDomains(){
-        let container = document.querySelector("#domain-container");
-        let htmlContent = `<ul>`;
-        domainList.forEach((domain) => {
-            let htmlDomain = `
-                <li><a href="/domains/${domain.id}">${domain.url}</a></li>
-            `;
-            htmlContent+= htmlDomain;
-        });
-        htmlContent += `</ul>`;
-        container.innerHTML = htmlContent;
-    }
-</script>
 </body>
 </html>

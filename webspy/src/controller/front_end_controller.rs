@@ -7,13 +7,28 @@ use crate::service::report_service::find_all;
 use crate::util::template_config::template_validity;
 
 #[get("/")]
-pub async fn hello(db: web::Data<AppState>) -> impl Responder {
+pub async fn index(db: web::Data<AppState>) -> impl Responder {
     let reg = HANDLEBARS_TEMPLATE.read().unwrap();
     let model = json!({
-        "title": "Home"
+        "title": "Home",
+        "version": "0.5"
     });
 
     let rendered_content = reg.render("home", &model)
+        .expect("Failed to render template");
+
+    // Assuming `template_validity` is a function that checks the validity of the rendered template
+    HttpResponse::Ok().body(rendered_content)
+}
+
+#[get("/dashboard")]
+pub async fn dashboard(db: web::Data<AppState>) -> impl Responder {
+    let reg = HANDLEBARS_TEMPLATE.read().unwrap();
+    let model = json!({
+        "title": "Dashboard"
+    });
+
+    let rendered_content = reg.render("dashboard", &model)
         .expect("Failed to render template");
 
     // Assuming `template_validity` is a function that checks the validity of the rendered template
