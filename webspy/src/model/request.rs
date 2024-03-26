@@ -35,7 +35,7 @@ pub struct Model{
     pub request_scheme:String,
     #[sea_orm(column_type = "Timestamp")]
     pub timestamp:DateTimeLocal,
-    pub domain_id: u64,
+    pub domain_id: u64, // TODO(costi): this needs to become a string
 }
 
 impl ActiveModelBehavior for ActiveModel {}
@@ -50,8 +50,8 @@ impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {
         match self {
             Self::Domain => Entity::belongs_to(super::domain::Entity)
-                .from(Column::DomainId)
-                .to(super::domain::Column::Id)
+                .from(Column::DomainId) // TODO(costi): this needs to be changed to use a string column type in order to function with the domain since the types will now need to be made into strings
+                .to(super::domain::Column::Domain)
                 .into(),
         }
     }

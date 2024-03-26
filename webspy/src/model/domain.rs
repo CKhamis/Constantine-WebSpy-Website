@@ -1,21 +1,49 @@
-use sea_orm::PrimaryKeyTrait;
+use sea_orm::{ColumnDef, ColumnTrait, ColumnType, ColumnTypeTrait, DeriveActiveModel, DeriveColumn, DeriveEntity, DeriveModel, EntityName, PrimaryKeyTrait};
+use sea_orm::{ActiveModelBehavior, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
 use sea_orm::DerivePrimaryKey;
-use sea_orm::{ActiveModelBehavior, DeriveEntityModel, DeriveRelation, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
 use sea_orm::prelude::DateTimeLocal;
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveEntityModel)]
-#[sea_orm(table_name = "domain")]
+#[derive(Copy, Clone, Default, Debug, DeriveEntity)]
+pub struct Entity; // add the entity struct, since we don't plan on generating this with proc macros
+
+impl EntityName for Entity {
+    // add the table name that the proc macro would have generated
+    fn table_name(&self) -> &str {
+        "domain"
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveModel, DeriveActiveModel)]
 pub struct Model{
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id:u64,
-    #[sea_orm(column_type = "Text")]
+    pub domain: String,
     pub name:String,
-    #[sea_orm(column_type = "Text")]
     pub url:String,
-    #[sea_orm(column_type = "Timestamp")]
     pub timestamp:DateTimeLocal,
+
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
+pub enum Column {
+    // define each column en order of appearance in the model struct
+    Name,
+    Url,
+    Timestamp,
+    Domain,
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
+pub enum PrimaryKey {
+    Domain, // define primary key manually, so we don't get any macro conflicts
+    // domain can be used here now since it's a `limited string` as defined in the column trait
+}
+
+impl PrimaryKeyTrait for PrimaryKey {
+    type ValueType = String;
+
+    fn auto_increment() -> bool {
+        false // we disable auto incrementing since the primary key is now a string
+    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
@@ -25,16 +53,31 @@ pub enum Relation {
     Request,
 }
 
-//todo: use macro?
-impl RelationTrait for Relation {
-    fn def(&self) -> RelationDef {
-        match self {
-            Self::Request => crate::model::domain::Entity::has_many(super::request::Entity).into(),
+// Implement column trait for each column defined in the model
+impl ColumnTrait for Column {
+    type EntityName = Entity;
+
+    fn def(&self) -> ColumnDef {
+        match self { // set all the types to be used by the domain model in the database's columns
+            // Column::Id => ColumnType::BigUnsigned.def(), // this column for ID gets removed since we plan on using domain as the ID instead
+            Column::Name => ColumnType::Text.def(),
+            Column::Url => ColumnType::Text.def(),
+            Column::Timestamp => ColumnType::Timestamp.def(),
+            Column::Domain => ColumnType::String(Some(255)).def(), // this evaluates to varchar(255)
         }
     }
 }
 
-impl Related<super::request::Entity> for crate::model::domain::Entity {
+
+impl RelationTrait for Relation {
+    fn def(&self) -> RelationDef {
+        match self {
+            Self::Request => Entity::has_many(super::request::Entity).into(),
+        }
+    }
+}
+
+impl Related<super::request::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Request.def()
     }
