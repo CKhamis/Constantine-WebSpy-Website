@@ -13,6 +13,8 @@ pub fn template_resources(){
         .expect("heading file not found");
     reg.register_partial("footer", include_str!("../../resources/template/components/Footer.hbs"))
         .expect("heading file not found");
+    reg.register_partial("dashboard_navigation", include_str!("../../resources/template/components/Dashboard_Navigation.hbs"))
+        .expect("heading file not found");
 
     reg.register_template_string("home", include_str!("../../resources/template/main/Index.hbs"))
         .expect("home file not found");

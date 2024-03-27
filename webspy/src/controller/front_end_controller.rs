@@ -11,7 +11,8 @@ pub async fn index(db: web::Data<AppState>) -> impl Responder {
     let reg = HANDLEBARS_TEMPLATE.read().unwrap();
     let model = json!({
         "title": "Home",
-        "version": "0.5"
+        "version": "0.5",
+        "authenticated": true,
     });
 
     let rendered_content = reg.render("home", &model)
@@ -25,7 +26,8 @@ pub async fn index(db: web::Data<AppState>) -> impl Responder {
 pub async fn dashboard(db: web::Data<AppState>) -> impl Responder {
     let reg = HANDLEBARS_TEMPLATE.read().unwrap();
     let model = json!({
-        "title": "Dashboard"
+        "title": "Dashboard",
+        "authenticated": false,
     });
 
     let rendered_content = reg.render("dashboard", &model)
