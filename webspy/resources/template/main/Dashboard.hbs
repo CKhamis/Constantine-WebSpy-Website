@@ -4,7 +4,7 @@
 <body class="bg-body" data-bs-theme="dark">
 {{> dashboard_navigation}}
 <main style="padding-left: 300px;">
-    <div id="main-content" class="container-fluid"></div>
+    <div id="main-content"></div>
     {{> footer}}
 </main>
 {{> scripts}}
@@ -33,6 +33,7 @@
                     domainList = data[0];
                     userList = data[1];
                     populateNavBar();
+                    renderHomeOverview();
                 })
                 .catch((response)=>{
                     console.log(response);
@@ -60,6 +61,16 @@
         container.innerHTML = htmlContent;
     }
 
+    function renderHomeOverview(){
+        let container = document.querySelector("#main-content");
+        let htmlContent = `
+        <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+            <h2 class="fw-bold fs-1">Traffic Overview</h2>
+        </div>
+        `;
+
+        container.innerHTML = htmlContent;
+    }
 
     function renderAllUsers(){
         let container = document.querySelector("#main-content");
