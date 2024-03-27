@@ -4,32 +4,35 @@
 <body class="bg-body" data-bs-theme="dark">
 {{> dashboard_navigation}}
 <main style="padding-left: 300px;">
-    <h1>Active Domains</h1>
-    <div id="domain-container"></div>
+    <div id="main-content" class="container-fluid"></div>
     {{> footer}}
 </main>
 {{> scripts}}
 <script>
-    let domainList;
+    let domainList, userList;
 
     refresh();
     function refresh(){
         const contentFetch = fetch("/api/domain/all");
+        const banFetch = fetch("/api/ban/all");
 
-        Promise.all([contentFetch])
+        Promise.all([contentFetch, banFetch])
                 .then(responses => {
                     const response1 = checkStatus(responses[0]);
+                    const response2 = checkStatus(responses[1]);
 
-                    return Promise.all([response1]);
+                    return Promise.all([response1, response2]);
                 })
                 .then(data => {
                     let response1 = data[0].json();
+                    let response2 = data[1].json();
 
-                    return Promise.all([response1]);
+                    return Promise.all([response1, response2]);
                 })
                 .then(data => {
                     domainList = data[0];
-                    renderDomains();
+                    userList = data[1];
+                    populateNavBar();
                 })
                 .catch((response)=>{
                     console.log(response);
@@ -44,7 +47,7 @@
     }
 
     // Rendering functions
-    function renderDomains(){
+    function populateNavBar(){
         let container = document.querySelector("#nav-domain-container");
         let htmlContent = `<li><a onclick="" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Overview</a></li>`;
         domainList.forEach((domain) => {
@@ -54,6 +57,24 @@
             htmlContent+= htmlDomain;
         });
         htmlContent += `<li><a onclick="viewCreateDomain()" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Add Domain</a></li>`;
+        container.innerHTML = htmlContent;
+    }
+
+
+    function renderAllUsers(){
+        let container = document.querySelector("#main-content");
+        let htmlContent = `
+            <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+                <h2 class="fw-bold fs-1">All Users</h2>
+            </div>
+        `;
+        domainList.forEach((user) => {
+            let htmlDomain = `
+                <p>rat</p>
+            `;
+            htmlContent+= htmlDomain;
+        });
+        htmlContent += ``;
         container.innerHTML = htmlContent;
     }
 </script>

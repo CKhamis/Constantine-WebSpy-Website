@@ -55,3 +55,8 @@ ul {
 .btn-toggle-nav a:focus {
     background-color: var(--bs-tertiary-bg);
 }
+
+.tiled-WS-background{
+    background-image: url('/static/tiles/WS & Logo Dark.svg');
+    background-size: 120px;
+}

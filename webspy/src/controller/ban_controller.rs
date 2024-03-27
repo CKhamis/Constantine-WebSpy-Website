@@ -7,7 +7,7 @@ use crate::service::{AppState, ban_service};
 use crate::service::ban_service::{get_bans, save_ban};
 use crate::service::domain_service::get_domains;
 
-#[get("/ban/all")]
+#[get("/api/ban/all")]
 pub async  fn all_bans(db: web::Data<AppState>) -> impl Responder{
     let current_bans = get_bans(&db).await;
     match serde_json::to_string(&current_bans){
@@ -16,7 +16,7 @@ pub async  fn all_bans(db: web::Data<AppState>) -> impl Responder{
     }
 }
 
-#[post("/ban/new")]
+#[post("/api/ban/new")]
 pub async  fn new_ban(new_ban_request: web::Json<NewBan>, db: web::Data<AppState>) -> impl Responder{
     match save_ban(&new_ban_request, &db).await{
         Ok(obj) => {HttpResponse::Ok().body(format!("IP address: {} was banned.", obj.ip))}
