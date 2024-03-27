@@ -3,9 +3,11 @@
 {{> header}}
 <body class="bg-body" data-bs-theme="dark">
 {{> dashboard_navigation}}
-<h1>Active Domains</h1>
-<div id="domain-container"></div>
-{{> footer}}
+<main style="padding-left: 300px;">
+    <h1>Active Domains</h1>
+    <div id="domain-container"></div>
+    {{> footer}}
+</main>
 {{> scripts}}
 <script>
     let domainList;
@@ -40,16 +42,18 @@
                             });
                 });
     }
+
+    // Rendering functions
     function renderDomains(){
-        let container = document.querySelector("#domain-container");
-        let htmlContent = `<ul>`;
+        let container = document.querySelector("#nav-domain-container");
+        let htmlContent = `<li><a onclick="" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Overview</a></li>`;
         domainList.forEach((domain) => {
             let htmlDomain = `
-                <li><a href="/domains/${domain.id}">${domain.url}</a></li>
+                <li><a onclick="viewDomain(${domain.id})" class="link-body-emphasis d-inline-flex text-decoration-none rounded">${domain.name}</a></li>
             `;
             htmlContent+= htmlDomain;
         });
-        htmlContent += `</ul>`;
+        htmlContent += `<li><a onclick="viewCreateDomain()" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Add Domain</a></li>`;
         container.innerHTML = htmlContent;
     }
 </script>
