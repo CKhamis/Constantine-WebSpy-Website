@@ -2,40 +2,92 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 // helpful resource: https://www.sea-ql.org/SeaORM/docs/generate-entity/entity-structure/
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveEntityModel)]
-#[sea_orm(table_name = "request")]
+#[derive(Copy, Clone, Default, Debug, DeriveEntity)]
+pub struct Entity; // add the entity struct, since we don't plan on generating this with proc macros
+
+impl EntityName for crate::model::request::Entity {
+    // add the table name that the proc macro would have generated
+    fn table_name(&self) -> &str {
+        "request"
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveModel, DeriveActiveModel)]
 pub struct Model{
-    #[sea_orm(primary_key, auto_increment = true)]
     pub id:i32,
-    #[sea_orm(column_type = "Text")]
     pub ip:String,
-    #[sea_orm(column_type = "Text")]
     pub client_host:String,
-    #[sea_orm(column_type = "Text")]
     pub client_port:String,
-    #[sea_orm(column_type = "Text")]
     pub client_user:String,
-    #[sea_orm(column_type = "Text")]
     pub client_locale:String,
-    #[sea_orm(column_type = "Text")]
     pub session:String,
-    #[sea_orm(column_type = "Text")]
     pub cookies:String,
-    #[sea_orm(column_type = "Text")]
     pub request_uri:String,
-    #[sea_orm(column_type = "Text")]
     pub request_url:String,
-    #[sea_orm(column_type = "Text")]
     pub request_method:String,
-    #[sea_orm(column_type = "Text")]
     pub request_header:String,
-    #[sea_orm(column_type = "Text")]
     pub request_protocol:String,
-    #[sea_orm(column_type = "Text")]
     pub request_scheme:String,
-    #[sea_orm(column_type = "Timestamp")]
     pub timestamp:DateTimeLocal,
-    pub domain_id: u64,
+    pub domain_id: String,
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
+pub enum PrimaryKey {
+    Id,
+}
+
+impl PrimaryKeyTrait for PrimaryKey {
+    type ValueType = String;
+
+    fn auto_increment() -> bool {
+        true
+    }
+}
+
+#[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
+pub enum Column {
+    Id,
+    Ip,
+    ClientHost,
+    ClientPort,
+    ClientUser,
+    ClientLocale,
+    Session,
+    Cookies,
+    RequestUri,
+    RequestUrl,
+    RequestMethod,
+    RequestHeader,
+    RequestProtocol,
+    RequestScheme,
+    Timestamp,
+    DomainId,
+}
+
+impl ColumnTrait for crate::model::request::Column {
+    type EntityName = crate::model::request::Entity;
+
+    fn def(&self) -> ColumnDef {
+        match self {
+            Column::Id => ColumnType::Integer.def(),
+            Column::Ip => ColumnType::String(Some(255)).def(),
+            Column::ClientHost => ColumnType::Text.def(),
+            Column::ClientPort => ColumnType::Text.def(),
+            Column::ClientUser => ColumnType::Text.def(),
+            Column::ClientLocale => ColumnType::Text.def(),
+            Column::Session => ColumnType::Text.def(),
+            Column::Cookies => ColumnType::Text.def(),
+            Column::RequestUri => ColumnType::Text.def(),
+            Column::RequestUrl => ColumnType::Text.def(),
+            Column::RequestMethod => ColumnType::Text.def(),
+            Column::RequestHeader => ColumnType::Text.def(),
+            Column::RequestProtocol => ColumnType::Text.def(),
+            Column::RequestScheme => ColumnType::Text.def(),
+            Column::Timestamp => ColumnType::Timestamp.def(),
+            Column::DomainId => ColumnType::String(Some(255)).def()
+        }
+    }
 }
 
 impl ActiveModelBehavior for ActiveModel {}
@@ -44,6 +96,7 @@ impl ActiveModelBehavior for ActiveModel {}
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {
     Domain,
+    User,
 }
 
 impl RelationTrait for Relation {
@@ -51,7 +104,11 @@ impl RelationTrait for Relation {
         match self {
             Self::Domain => Entity::belongs_to(super::domain::Entity)
                 .from(Column::DomainId)
-                .to(super::domain::Column::Id)
+                .to(super::domain::Column::Domain)
+                .into(),
+            Self::User => Entity::belongs_to(super::user::Entity)
+                .from(Column::Ip)
+                .to(super::user::Column::Ip)
                 .into(),
         }
     }
@@ -60,5 +117,11 @@ impl RelationTrait for Relation {
 impl Related<super::domain::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Domain.def()
+    }
+}
+
+impl Related<super::user::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::User.def()
     }
 }

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 //#[serde(default)]
 pub struct Report{
     // Authentication
-    pub domain_id:u64,
+    pub domain_id:String,
     
     // Client info
     pub ip:String,

@@ -8,8 +8,7 @@ use crate::service::AppState;
 
 pub async fn save_domain(new_domain: &web::Json<NewDomain>, db: web::Data<AppState>) -> Result<domain::Model, DbErr> {
     let incoming_domain = crate::model::domain::ActiveModel{
-        id: ActiveValue::Set(Uuid::new_v4().as_u64_pair().0),
-        url: ActiveValue::Set(new_domain.url.clone()),
+        domain: ActiveValue::Set(new_domain.url.clone()),
         name: ActiveValue::Set(new_domain.name.clone()),
         timestamp: ActiveValue::Set(Local::now()),
     };

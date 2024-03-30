@@ -4,12 +4,11 @@ use std::sync::RwLock;
 use actix_web::{App, HttpServer, web};
 use handlebars::Handlebars;
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema};
-use webspy::controller::ban_controller::{all_bans, new_ban};
 use webspy::controller::controller_prelude::*;
 use webspy::controller::domain_controller::{all_domains, new_domain};
 use webspy::controller::report_controller::report_request;
 use webspy::HANDLEBARS_TEMPLATE;
-use webspy::model::{ban, domain, request};
+use webspy::model::{user, domain, request};
 use webspy::util::template_config::template_resources;
 
 #[actix_web::main]
@@ -35,17 +34,17 @@ async fn main() -> std::io::Result<()> {
             assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
         }
     }
-    let request_table = builder.build(&schema.create_table_from_entity(request::Entity));
-    match connection.execute(request_table).await{
-        Ok(_) => {println!("Creating new table: request");}
+    let ban_table = builder.build(&schema.create_table_from_entity(user::Entity));
+    match connection.execute(ban_table).await{
+        Ok(_) => {println!("Creating new table: ban");}
         Err(e) => {
             // Crash program if table could not be created if not exists
             assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
         }
     }
-    let ban_table = builder.build(&schema.create_table_from_entity(ban::Entity));
-    match connection.execute(ban_table).await{
-        Ok(_) => {println!("Creating new table: ban");}
+    let request_table = builder.build(&schema.create_table_from_entity(request::Entity));
+    match connection.execute(request_table).await{
+        Ok(_) => {println!("Creating new table: request");}
         Err(e) => {
             // Crash program if table could not be created if not exists
             assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
@@ -62,8 +61,8 @@ async fn main() -> std::io::Result<()> {
             .service(new_domain)
             .service(all_domains)
             .service(report_request)
-            .service(new_ban)
-            .service(all_bans)
+            // .service(new_ban)
+            // .service(all_bans)
             .service(actix_files::Files::new("/static", "./webspy/resources/static"))
             .route("/hey", web::get().to(manual_hello))
             .app_data(web::Data::new(app_state.clone()))

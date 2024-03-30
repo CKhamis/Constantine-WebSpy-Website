@@ -1,8 +1,9 @@
 use sea_orm::{ColumnDef, ColumnTrait, ColumnType, ColumnTypeTrait, DeriveActiveModel, DeriveColumn, DeriveEntity, DeriveModel, EntityName, PrimaryKeyTrait};
-use sea_orm::{ActiveModelBehavior, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
 use sea_orm::DerivePrimaryKey;
+use sea_orm::{ActiveModelBehavior, DeriveEntityModel, DeriveRelation, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
 use sea_orm::prelude::DateTimeLocal;
 use serde::{Deserialize, Serialize};
+use crate::util::threat_level::DangerLevel;
 
 #[derive(Copy, Clone, Default, Debug, DeriveEntity)]
 pub struct Entity; // add the entity struct, since we don't plan on generating this with proc macros
@@ -10,29 +11,32 @@ pub struct Entity; // add the entity struct, since we don't plan on generating t
 impl EntityName for Entity {
     // add the table name that the proc macro would have generated
     fn table_name(&self) -> &str {
-        "domain"
+        "user"
     }
 }
-
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveModel, DeriveActiveModel)]
 pub struct Model{
-    pub domain: String,
-    pub name:String,
-    pub timestamp:DateTimeLocal,
-
+    pub ip:String,
+    pub nickname: Option<String>,
+    pub reason: Option<String>,
+    pub first_seen: DateTimeLocal,
+    pub expire: Option<DateTimeLocal>,
+    pub tags: Option<DangerLevel>
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
 pub enum Column {
-    // define each column en order of appearance in the model struct
-    Domain,
-    Name,
-    Timestamp,
+    Ip,
+    Nickname,
+    Reason,
+    FirstSeen,
+    Expire,
+    Tags,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
 pub enum PrimaryKey {
-    Domain, // define primary key manually, so we don't get any macro conflicts
+    Ip, // define primary key manually, so we don't get any macro conflicts
     // domain can be used here now since it's a `limited string` as defined in the column trait
 }
 
@@ -46,11 +50,6 @@ impl PrimaryKeyTrait for PrimaryKey {
 
 impl ActiveModelBehavior for ActiveModel {}
 
-#[derive(Copy, Clone, Debug, EnumIter, Deserialize, Serialize)]
-pub enum Relation {
-    Request,
-}
-
 // Implement column trait for each column defined in the model
 impl ColumnTrait for Column {
     type EntityName = Entity;
@@ -58,13 +57,20 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self { // set all the types to be used by the domain model in the database's columns
             // Column::Id => ColumnType::BigUnsigned.def(), // this column for ID gets removed since we plan on using domain as the ID instead
-            Column::Domain => ColumnType::String(Some(255)).def(), // this evaluates to varchar(255)
-            Column::Name => ColumnType::Text.def(),
-            Column::Timestamp => ColumnType::Timestamp.def(),
+            Column::Ip => ColumnType::String(Some(255)).def(),
+            Column::Nickname => ColumnType::Text.def().nullable(),
+            Column::Reason => ColumnType::Text.def().nullable(),
+            Column::Expire => ColumnType::Timestamp.def().nullable(),
+            Column::FirstSeen => ColumnType::Timestamp.def(),
+            Column::Tags => ColumnType::Integer.def().nullable(),
         }
     }
 }
 
+#[derive(Copy, Clone, Debug, EnumIter, Deserialize, Serialize)]
+pub enum Relation {
+    Request,
+}
 
 impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {

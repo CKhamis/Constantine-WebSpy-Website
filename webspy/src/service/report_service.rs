@@ -1,15 +1,19 @@
 use actix_web::web;
-use sea_orm::{ActiveModelTrait, ActiveValue, DatabaseConnection, DbErr, EntityTrait};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
 use sqlx::types::chrono::Local;
 use uuid::Uuid;
 use crate::data_transfer_object::report::Report;
-use crate::model::request;
+use crate::model::{domain, request};
 use crate::model::request::{Model};
 use crate::service::AppState;
 
 pub async fn find_all(conn: &DatabaseConnection){
     let logs: Vec<Model> = request::Entity::find().all(conn).await.unwrap();
     println!("{:?}", logs);
+}
+
+pub async fn verify_domain(url: &String, conn: &DatabaseConnection) -> bool{
+    domain::Entity::find_by_id(url).one(conn).await.unwrap().is_some()
 }
 
 pub async fn save_request(report: &web::Json<Report>, db: &web::Data<AppState>) -> Result<Model, DbErr> {
@@ -29,7 +33,7 @@ pub async fn save_request(report: &web::Json<Report>, db: &web::Data<AppState>) 
         request_protocol: ActiveValue::Set(report.request_protocol.to_string()),
         request_scheme: ActiveValue::Set(report.request_scheme.to_string()),
         timestamp: ActiveValue::Set(Local::now()),
-        domain_id: ActiveValue::Set(report.domain_id),
+        domain_id: ActiveValue::Set(report.domain_id.clone()),
     };
 
 

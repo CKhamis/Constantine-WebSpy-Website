@@ -9,7 +9,7 @@ pub async fn new_domain(new_domain: web::Json<NewDomain>, db: web::Data<AppState
     match save_domain(&new_domain, db).await{
         Ok(a) => {
             println!("{:?}", a);
-            HttpResponse::Ok().body(format!("New domain added: {} \t {} \t at {}", a.name, a.url, a.timestamp))
+            HttpResponse::Ok().body(format!("New domain added: {} \t {} \t at {}", a.name, a.domain, a.timestamp))
         }
         Err(a) => {
             println!("{}", a);
