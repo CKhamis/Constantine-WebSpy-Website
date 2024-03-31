@@ -7,6 +7,7 @@ use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, 
 use webspy::controller::controller_prelude::*;
 use webspy::controller::domain_controller::{all_domains, new_domain};
 use webspy::controller::report_controller::report_request;
+use webspy::controller::user_controller::*;
 use webspy::HANDLEBARS_TEMPLATE;
 use webspy::model::{user, domain, request};
 use webspy::util::template_config::template_resources;
@@ -61,6 +62,9 @@ async fn main() -> std::io::Result<()> {
             .service(new_domain)
             .service(all_domains)
             .service(report_request)
+            .service(get_banned_users)
+            .service(get_all_users_by_activity)
+            .service(get_all_users)
             // .service(new_ban)
             // .service(all_bans)
             .service(actix_files::Files::new("/static", "./webspy/resources/static"))
