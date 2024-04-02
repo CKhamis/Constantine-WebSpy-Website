@@ -14,9 +14,9 @@
     refresh();
     function refresh(){
         const contentFetch = fetch("/api/domain/all");
-        const banFetch = fetch("/api/ban/all");
+        const userFetch = fetch("/api/user/all");
 
-        Promise.all([contentFetch, banFetch])
+        Promise.all([contentFetch, userFetch])
                 .then(responses => {
                     const response1 = checkStatus(responses[0]);
                     const response2 = checkStatus(responses[1]);
@@ -78,14 +78,18 @@
             <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
                 <h2 class="fw-bold fs-1">All Users</h2>
             </div>
+            <div class="row">
         `;
-        domainList.forEach((user) => {
+        userList.forEach((user) => {
             let htmlDomain = `
-                <p>rat</p>
+                <div class="col-12 col-md-4 bg-body-tertiary">
+                    <h3>${user.ip}</h3>
+                    <p>${user.nickname}</p>
+                </div>
             `;
             htmlContent+= htmlDomain;
         });
-        htmlContent += ``;
+        htmlContent += `</div>`;
         container.innerHTML = htmlContent;
     }
 </script>
