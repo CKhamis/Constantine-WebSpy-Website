@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 {{> header}}
-<body class="bg-body" data-bs-theme="dark">
+<body class="bg-black" data-bs-theme="dark">
 {{> dashboard_navigation}}
 <main style="padding-left: 300px;">
     <div id="main-content"></div>
@@ -78,20 +78,79 @@
             <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
                 <h2 class="fw-bold fs-1">All Users</h2>
             </div>
-            <div class="row">
+            <div class="container-fluid">
+                <p class="fs-4">Ordered ${userList.length} users by date discovered</p>
+                <div class="row row-cols-1 row-cols-md-3 row cols-lg-4">
         `;
         userList.forEach((user) => {
             let htmlDomain = `
-                <div class="col-12 col-md-4 bg-body-tertiary">
-                    <h3>${user.ip}</h3>
-                    <p>${user.nickname}</p>
+                <div class="col mb-4">
+                    <div class="px-4 py-3 rounded-3 bg-dark" onclick="viewUser(${user.ip})">
+                        <h3>${user.ip}</h3>
+                        <p>${user.nickname} &#8226; ${createBadge(user.tags)}</p>
+                    </div>
                 </div>
             `;
             htmlContent+= htmlDomain;
         });
-        htmlContent += `</div>`;
+        htmlContent += `</div></div>`;
         container.innerHTML = htmlContent;
     }
+
+    function viewUser(ip){
+        let container = document.querySelector("#main-content");
+        if(ip===""){
+            container.innerHTML = `
+            <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+                <h2 class="fw-bold fs-1">User Details</h2>
+            </div>
+            <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;">
+                <div class="row">
+                    <div class="col-md-6 offset-md-3 p-4">
+                        <h2 class="fw-bold text-center mb-2">User lookup</h2>
+                        <label for="user-lookup-form" class="form-label">IP address of user</label>
+                        <input class="form-control form-control-lg" id="user-lookup-form" type="text" placeholder="192.168.0.1" aria-describedby="ipHelper">
+                        <div id="ipHelper" class="form-text">ID must be exact</div>
+                        <button class="btn btn-primary mb-3 mt-3">Search User</button>
+                    </div>
+                </div>
+            </div>
+
+            `;
+        }else{
+            container.innerHTML = `
+            <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+                <h2 class="fw-bold fs-1">User Details</h2>
+            </div>
+            <div class="container-fluid">
+            </div>
+        `;
+        }
+    }
+</script>
+
+<script>
+    const createBadge = (status) => {
+        let badgeClass = '';
+        switch (status) {
+            case 'Threat':
+                badgeClass = 'badge text-bg-danger';
+                break;
+            case 'Suspicious':
+                badgeClass = 'badge text-bg-warning';
+                break;
+            case 'Normal':
+                badgeClass = 'badge text-bg-success';
+                break;
+            case 'NotAssessed':
+                badgeClass = 'badge text-bg-secondary';
+                break;
+            default:
+                badgeClass = 'badge text-bg-secondary';
+                break;
+        }
+        return `<span class="${badgeClass}">${status}</span>`;
+    };
 </script>
 </body>
 </html>
