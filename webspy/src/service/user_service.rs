@@ -17,8 +17,9 @@ pub async fn all_users(db: &web::Data<AppState>) -> Vec<user::Model> {
     user::Entity::find().order_by_desc(user::Column::FirstSeen).all(&db.conn).await.unwrap()
 }
 
+// type CoolRow = Vec<(String, Option<DateTimeLocal>)>;
 pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateTimeLocal>)> {
-    let rat: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
+    let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,
         "SELECT ip, MAX(request.timestamp) AS last_seen
             FROM web_spy.request
@@ -26,29 +27,9 @@ pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateT
             ORDER BY last_seen DESC;"
     )).await.unwrap();
 
-    rat.iter().filter_map(|ratr| {
-        let ip:Result<String, DbErr> = ratr.try_get_by(0);// try get many by index
-        let last_seen:Result<DateTimeLocal, DbErr> = ratr.try_get_by(1);
-        let raet = ip.ok().map(|a| {(a, last_seen.ok())});
-        raet
+    query_result_list.iter().filter_map(|query_result| {
+        query_result.try_get_many_by_index().ok()
     }).collect()
-
-
-    // println!("{:?}", request::Entity::find()
-    //     .select_only()
-    //     .column_as(request::Column::Ip, "ip")
-    //     .expr_as_(request::Column::Timestamp.max(), "last seen")
-    //     .group_by(request::Column::Ip)
-    //     .order_by_desc(request::Column::Timestamp.max())
-    //     .build(DbBackend::MySql)
-    //     .to_string());
-    // println!("{:?}", request::Entity::find()
-    //     .select_only()
-    //     .column_as(request::Column::Ip, "ip")
-    //     .expr_as_(request::Column::Timestamp.max(), "last seen")
-    //     .group_by(request::Column::Ip)
-    //     .order_by_desc(request::Column::Timestamp.max())
-    //     .all(&db.conn).await);
 }
 
 pub async fn banned_users(db: &web::Data<AppState>) -> Vec<user::Model> {
