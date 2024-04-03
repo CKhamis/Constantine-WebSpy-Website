@@ -97,7 +97,7 @@
         container.innerHTML = htmlContent;
     }
 
-    function viewUser(ip){
+    function viewUser(ip, err=""){
         let container = document.querySelector("#main-content");
         if(ip===""){
             container.innerHTML = `
@@ -108,10 +108,11 @@
                 <div class="row">
                     <div class="col-md-6 offset-md-3 p-4">
                         <h2 class="fw-bold text-center mb-2">User lookup</h2>
+                        ${err != ""? `<div class='alert alert-danger alert-dismissible fade show'>${err}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>` : ""}
                         <label for="user-lookup-form" class="form-label">IP address of user</label>
                         <input class="form-control form-control-lg" id="user-lookup-form" type="text" placeholder="192.168.0.1" aria-describedby="ipHelper">
                         <div id="ipHelper" class="form-text">ID must be exact</div>
-                        <button class="btn btn-primary mb-3 mt-3">Search User</button>
+                        <button class="btn btn-primary mb-3 mt-3" onclick="searchUserButton()">Search User</button>
                     </div>
                 </div>
             </div>
@@ -123,7 +124,7 @@
 
             if(user === undefined || user == null){
                 // User not found
-                viewUser('');
+                viewUser('', "User not found");
             }
 
             // Query database for reports
@@ -347,6 +348,11 @@
                                 });
                     });
         }
+    }
+
+    function searchUserButton(){
+        let ip = document.querySelector("#user-lookup-form").value;
+        viewUser(ip);
     }
 </script>
 
