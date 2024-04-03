@@ -127,22 +127,25 @@
             }
 
             // Query database for reports
-            Promise.all([fetch('/api/report/user/' + ip), fetch('/api/analytics/endpoint-requests/' + ip)])
+            Promise.all([fetch('/api/report/user/' + ip), fetch('/api/analytics/endpoint-requests/' + ip), fetch('/api/analytics/domain-requests/' + ip)])
                     .then(responses => {
                         const response1 = checkStatus(responses[0]);
                         const response2 = checkStatus(responses[1]);
+                        const response3 = checkStatus(responses[2]);
 
-                        return Promise.all([response1, response2]);
+                        return Promise.all([response1, response2, response3]);
                     })
                     .then(data => {
                         let response1 = data[0].json();
                         let response2 = data[1].json();
+                        let response3 = data[2].json();
 
-                        return Promise.all([response1, response2]);
+                        return Promise.all([response1, response2, response3]);
                     })
                     .then(data => {
                         let userReports = data[0];
                         let requestFrequency = data[1];
+                        let domainFrequency = data[2];
                         let lastSeen = formatDate(userReports[0].timestamp);
                         let firstSeen = formatDate(userReports[userReports.length-1].timestamp);
 
@@ -150,6 +153,81 @@
                         for(let i = 0; i < requestFrequency.length && i < 4; i++){
                             topEndpoints += `<p class="mb-1"><strong>${requestFrequency[i][1]}</strong>: ${requestFrequency[i][0]}</p>`;
                         }
+
+                        // Report table
+                        let reportTable = `
+                            <table class="table table-dark table-striped table-responsive">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Domain</th>
+                                        <th scope="col">Timestamp</th>
+                                        <th scope="col">url</th>
+                                        <th scope="col">method</th>
+                                        <th scope="col">header</th>
+                                        <th scope="col">protocol</th>
+                                        <th scope="col">Locale</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        userReports.forEach((request) => {
+                            reportTable += `
+                            <tr>
+                                <th scope="row">${request.domain_id}</th>
+                                <td>${request.timestamp}</td>
+                                <td>${request.request_url}</td>
+                                <td>${request.request_method}</td>
+                                <td>${request.request_header}</td>
+                                <td>${request.request_protocol}</td>
+                                <td>${request.client_locale}</td>
+                            </tr>
+                            `;
+                        });
+                        reportTable += `</tbody></table>`;
+
+                        // Endpoint frequency table
+                        let endpointTable = `
+                            <table class="table table-dark table-striped table-responsive">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Endpoint</th>
+                                        <th scope="col">Frequency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        requestFrequency.forEach((request) => {
+                            endpointTable += `
+                            <tr>
+                                <th scope="row">${request[0]}</th>
+                                <td>${request[1]}</td>
+                            </tr>
+                            `;
+                        });
+                        endpointTable += `</tbody></table>`;
+
+
+                        // Domain frequency table
+                        let domainTable = `
+                            <table class="table table-dark table-striped table-responsive">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Domain</th>
+                                        <th scope="col">Frequency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        domainFrequency.forEach((request) => {
+                            domainTable += `
+                            <tr>
+                                <th scope="row">${request[0]}</th>
+                                <td>${request[1]}</td>
+                            </tr>
+                            `;
+                        });
+                        domainTable += `</tbody></table>`;
+
 
                         container.innerHTML = `
                         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
@@ -191,13 +269,33 @@
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
                                 </div>
-                                <div class="col-12 mb-2">
+                                <div class="col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark d-flex justify-content-between">
                                         <div>
                                             <h2 class="fw-bold">Conditional Access</h2>
                                         </div>
                                         <div>rat</div>
                                         <div>rat</div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <div class="py-3">
+                                        <ul class="nav nav-underline" id="myTab" role="tablist">
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="request-by-date-tab" data-bs-toggle="tab" data-bs-target="#request-by-date-tab-pane" type="button" role="tab" aria-controls="request-by-date-tab-pane" aria-selected="true">All Requests</button>
+                                          </li>
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="endpoint-frequency-tab" data-bs-toggle="tab" data-bs-target="#endpoint-frequency-tab-pane" type="button" role="tab" aria-controls="endpoint-frequency-tab-pane" aria-selected="false">Endpoint Frequency</button>
+                                          </li>
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#domain-frequency-tab-pane" type="button" role="tab" aria-controls="domain-frequency-tab-pane" aria-selected="false">Domain Frequency</button>
+                                          </li>
+                                        </ul>
+                                        <div class="tab-content" id="myTabContent">
+                                          <div class="tab-pane fade show active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0">${reportTable}</div>
+                                          <div class="tab-pane fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0">${endpointTable}</div>
+                                          <div class="tab-pane fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
