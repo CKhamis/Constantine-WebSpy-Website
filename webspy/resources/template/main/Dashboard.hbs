@@ -87,7 +87,7 @@
                 <div class="col mb-4">
                     <div class="px-3 py-3 rounded-3 bg-dark" onclick="viewUser('${user.ip}')">
                         <h3>${user.ip}</h3>
-                        <p>${user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
+                        <p>${user.nickname !== 'null' ? "No Name" : user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
                     </div>
                 </div>
             `;
@@ -240,7 +240,7 @@
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark">
                                         <h3 class="text-center fw-bold">${user.ip}</h3>
-                                        <h5 class="text-center fw-bold">${user.nickname !== 'null' ? "no name" : user.nickname}</h5>
+                                        <h5 class="text-center fw-bold">${user.nickname !== 'null' ? "No name" : user.nickname}</h5>
                                         <p class="text-center fs-4">${createBadge(user.threat_level)}</p>
                                         <p class="fw-bold text-center fs-4">Total Requests: ${userReports.length}</p>
                                     </div>
