@@ -60,3 +60,9 @@ ul {
     background-image: url('/static/tiles/WS & Logo Dark.svg');
     background-size: 120px;
 }
+
+.dual-info-box{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}

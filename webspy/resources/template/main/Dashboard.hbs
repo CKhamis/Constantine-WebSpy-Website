@@ -85,7 +85,7 @@
         userList.forEach((user) => {
             let htmlDomain = `
                 <div class="col mb-4">
-                    <div class="px-4 py-3 rounded-3 bg-dark" onclick="viewUser('${user.ip}')">
+                    <div class="px-3 py-3 rounded-3 bg-dark" onclick="viewUser('${user.ip}')">
                         <h3>${user.ip}</h3>
                         <p>${user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
                     </div>
@@ -126,27 +126,94 @@
                 viewUser('');
             }
 
-            container.innerHTML = `
-            <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
-                <h2 class="fw-bold fs-1">User Details</h2>
-            </div>
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-4 mb-2"><a class="text-secondary fs-4" onclick="renderAllUsers()">&lt; All Users</a></div>
-                    <div class="col-8 mb-2"><a class="text-secondary fs-4 float-end">Edit User</a></div>
-                    <div class="col-lg-4 col-12">
-                        <div class="px-4 py-3 rounded-3 bg-dark">
-                            <h3 class="text-center fw-bold">${user.ip}</h3>
-                            <h5 class="text-center fw-bold">${user.nickname}</h5>
-                            <p class="text-center">${createBadge(user.threat_level)}</p>
+            // Query database for reports
+            Promise.all([fetch('/api/report/user/' + ip), fetch('/api/analytics/endpoint-requests/' + ip)])
+                    .then(responses => {
+                        const response1 = checkStatus(responses[0]);
+                        const response2 = checkStatus(responses[1]);
+
+                        return Promise.all([response1, response2]);
+                    })
+                    .then(data => {
+                        let response1 = data[0].json();
+                        let response2 = data[1].json();
+
+                        return Promise.all([response1, response2]);
+                    })
+                    .then(data => {
+                        let userReports = data[0];
+                        let requestFrequency = data[1];
+                        let lastSeen = formatDate(userReports[0].timestamp);
+                        let firstSeen = formatDate(userReports[userReports.length-1].timestamp);
+
+                        let topEndpoints = "";
+                        for(let i = 0; i < requestFrequency.length && i < 4; i++){
+                            topEndpoints += `<p class="mb-1"><strong>${requestFrequency[i][1]}</strong>: ${requestFrequency[i][0]}</p>`;
+                        }
+
+                        container.innerHTML = `
+                        <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+                            <h2 class="fw-bold fs-1">User Details</h2>
                         </div>
-                    </div>
-                    <div class="col-lg-8 col-12">
-                        <div class="px-4 py-3 rounded-3 bg-dark">graph</div>
-                    </div>
-                </div>
-            </div>
-        `;
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-4 mb-2"><a class="text-secondary fs-4" onclick="renderAllUsers()">&lt; All Users</a></div>
+                                <div class="col-8 mb-2"><a class="text-secondary fs-4 float-end">Edit User</a></div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark">
+                                        <h3 class="text-center fw-bold">${user.ip}</h3>
+                                        <h5 class="text-center fw-bold">${user.nickname !== 'null' ? "no name" : user.nickname}</h5>
+                                        <p class="text-center fs-4">${createBadge(user.threat_level)}</p>
+                                        <p class="fw-bold text-center fs-4">Total Requests: ${userReports.length}</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-8 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark dual-info-box h-100">
+                                        <div>
+                                            <h5 class="fw-bold text-center">First Seen</h5>
+                                            <p class="fs-4 text-center mb-0">${firstSeen}</p>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold text-center">Last Seen</h5>
+                                            <p class="fs-4 text-center mb-0">${lastSeen}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h5 class="fw-bold text-center">Top Endpoints</h5>
+                                        ${topEndpoints}
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <div class="px-3 py-3 rounded-3 bg-dark d-flex justify-content-between">
+                                        <div>
+                                            <h2 class="fw-bold">Conditional Access</h2>
+                                        </div>
+                                        <div>rat</div>
+                                        <div>rat</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    })
+                    .catch((response)=>{
+                        console.log(response);
+                        response.json()
+                                .then(errorData => {
+                                    console.log(errorData);
+                                })
+                                .catch(error => {
+                                    console.error("Error parsing error response:", error);
+                                });
+                    });
         }
     }
 </script>
@@ -175,6 +242,13 @@
     };
     function userLookup(ip){
         return userList.find(user => user.ip === ip);
+    }
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${mm}/${dd}/${yyyy}`;
     }
 </script>
 </body>
