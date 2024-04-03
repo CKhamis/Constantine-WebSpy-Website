@@ -8,6 +8,7 @@ use crate::data_transfer_object::new_domain::NewDomain;
 use crate::model::{request, user};
 use crate::model::user::Model;
 use crate::service::AppState;
+use crate::util::threat_level::DangerLevel;
 
 pub async fn user_check(ip:&String, db: &web::Data<AppState>) -> Result<Option<Model>, DbErr> {
     user::Entity::find_by_id(ip).one(&db.conn).await
@@ -47,7 +48,7 @@ pub async fn new_user(new_user: NewUser, db: &web::Data<AppState>) -> Result<use
         reason: new_user.message.map_or(ActiveValue::NotSet, |a| {ActiveValue::Set(Option::from(a))}),
         first_seen: ActiveValue::Set(Local::now()),
         expire: new_user.expire.map_or(ActiveValue::NotSet, |a| {ActiveValue::Set(Option::from(a))}),
-        tags: ActiveValue::NotSet,
+        threat_level: ActiveValue::Set(DangerLevel::NotAssessed),
     };
     constructed_model.insert(&db.conn).await
 }

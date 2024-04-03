@@ -1,5 +1,5 @@
 use actix_web::web;
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder};
 use sqlx::types::chrono::Local;
 use uuid::Uuid;
 use crate::data_transfer_object::report::Report;
@@ -14,6 +14,13 @@ pub async fn find_all(conn: &DatabaseConnection){
 
 pub async fn verify_domain(url: &String, conn: &DatabaseConnection) -> bool{
     domain::Entity::find_by_id(url).one(conn).await.unwrap().is_some()
+}
+
+pub async fn find_by_user(user_ip: &String, conn: &DatabaseConnection) -> Vec<Model>{
+    request::Entity::find()
+        .filter(request::Column::Ip.eq(user_ip))
+        .order_by_desc(request::Column::Timestamp)
+        .all(conn).await.unwrap()
 }
 
 pub async fn save_request(report: &web::Json<Report>, db: &web::Data<AppState>) -> Result<Model, DbErr> {

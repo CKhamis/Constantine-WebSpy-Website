@@ -85,9 +85,9 @@
         userList.forEach((user) => {
             let htmlDomain = `
                 <div class="col mb-4">
-                    <div class="px-4 py-3 rounded-3 bg-dark" onclick="viewUser(${user.ip})">
+                    <div class="px-4 py-3 rounded-3 bg-dark" onclick="viewUser('${user.ip}')">
                         <h3>${user.ip}</h3>
-                        <p>${user.nickname} &#8226; ${createBadge(user.tags)}</p>
+                        <p>${user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
                     </div>
                 </div>
             `;

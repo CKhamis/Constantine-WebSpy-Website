@@ -1,7 +1,7 @@
 use std::future::Future;
 use std::ops::Sub;
 use actix_web::http::header::ContentType;
-use actix_web::{HttpResponse, post, Responder, web};
+use actix_web::{get, HttpResponse, post, Responder, web};
 use chrono::{Days, TimeZone};
 use sea_orm::DbErr;
 use sea_orm::prelude::DateTime;
@@ -11,8 +11,8 @@ use crate::data_transfer_object::new_user::NewUser;
 use crate::data_transfer_object::report::Report;
 use crate::model::user::Model;
 use crate::service::AppState;
-use crate::service::user_service::{new_user, user_check};
-use crate::service::report_service::{save_request, verify_domain};
+use crate::service::user_service::{active_users, new_user, user_check};
+use crate::service::report_service::{find_by_user, save_request, verify_domain};
 
 #[post("/report")]
 pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppState>) -> impl Responder {
@@ -99,5 +99,13 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
                 HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
             }
         }
+    }
+}
+
+#[get("/api/report/user/{ip}")]
+pub async fn get_report_by_user(ip_address: web::Path<String>, app_state: web::Data<AppState>) -> impl Responder{
+    match serde_json::to_string(&find_by_user(&ip_address, &app_state.conn).await){
+        Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
+        Err(_) => {HttpResponse::BadRequest().body("There was an error serializing")}
     }
 }

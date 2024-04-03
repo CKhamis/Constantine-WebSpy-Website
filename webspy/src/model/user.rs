@@ -21,7 +21,7 @@ pub struct Model{
     pub reason: Option<String>,
     pub first_seen: DateTimeLocal,
     pub expire: Option<DateTimeLocal>,
-    pub tags: Option<DangerLevel>
+    pub threat_level: DangerLevel
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
@@ -31,7 +31,7 @@ pub enum Column {
     Reason,
     FirstSeen,
     Expire,
-    Tags,
+    ThreatLevel,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
@@ -62,7 +62,7 @@ impl ColumnTrait for Column {
             Column::Reason => ColumnType::Text.def().nullable(),
             Column::Expire => ColumnType::Timestamp.def().nullable(),
             Column::FirstSeen => ColumnType::Timestamp.def(),
-            Column::Tags => ColumnType::Integer.def().nullable(),
+            Column::ThreatLevel => ColumnType::Integer.def(),
         }
     }
 }
