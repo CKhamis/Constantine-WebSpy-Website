@@ -39,13 +39,13 @@ pub async fn domain_activity(db: &web::Data<AppState>) -> Vec<(String, i64)> {
     }).collect()
 }
 
-pub async fn endpoint_frequency(db: &web::Data<AppState>) -> Vec<(String, i32)> {
+pub async fn endpoint_frequency(db: &web::Data<AppState>) -> Vec<(String, String, String, i32)> {
     let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,
         "
-            SELECT request_uri, COUNT(request_uri) AS frequency
+            SELECT domain_id, request_uri, request_method, COUNT(request_uri) AS frequency
             FROM request
-            GROUP BY request_uri
+            GROUP BY domain_id, request_method, request_uri
             ORDER BY frequency DESC;"
     )).await.unwrap();
 
@@ -74,6 +74,27 @@ pub async fn daily_activity_by_user(ip_address: &str, db: &web::Data<AppState>) 
     }).collect()
 }
 
+pub async fn daily_activity_by_user_by_domain(ip_address: &str, db: &web::Data<AppState>) -> Vec<(String, DateTimeLocal, i32)> {
+    // Check if ip address is valid
+    if IpAddr::from_str(ip_address).is_err() && Ipv6Addr::from_str(ip_address).is_err() {
+        return vec![];
+    };
+
+    let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
+        DatabaseBackend::MySql,
+        format!("
+            SELECT domain_id, CAST(DATE(timestamp) AS datetime) AS date, COUNT(*) AS total_requests
+            FROM web_spy.request
+            WHERE ip = '{}'
+            GROUP BY domain_id, CAST(DATE(timestamp) AS datetime)
+            ORDER BY CAST(DATE(timestamp) AS datetime) DESC;", ip_address)
+    )).await.unwrap();
+
+    query_result_list.iter().filter_map(|query_result| {
+        query_result.try_get_many_by_index().ok()
+    }).collect()
+}
+
 pub async fn domain_activity_by_user(ip_address: &str, db: &web::Data<AppState>) -> Vec<(String, i64)> {
     // Check if ip address is valid
     if IpAddr::from_str(ip_address).is_err() && Ipv6Addr::from_str(ip_address).is_err() {
@@ -94,7 +115,7 @@ pub async fn domain_activity_by_user(ip_address: &str, db: &web::Data<AppState>)
     }).collect()
 }
 
-pub async fn endpoint_frequency_by_user(ip_address: &str, db: &web::Data<AppState>) -> Vec<(String, i32)> {
+pub async fn endpoint_frequency_by_user(ip_address: &str, db: &web::Data<AppState>) -> Vec<(String, String, String, i32)> {
     // Check if ip address is valid
     if IpAddr::from_str(ip_address).is_err() && Ipv6Addr::from_str(ip_address).is_err() {
         return vec![];
@@ -103,10 +124,10 @@ pub async fn endpoint_frequency_by_user(ip_address: &str, db: &web::Data<AppStat
     let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,
         format!("
-            SELECT request_uri, COUNT(request_uri) AS frequency
+            SELECT domain_id, request_uri, request_method, COUNT(request_uri) AS frequency
             FROM request
             WHERE ip = '{}'
-            GROUP BY request_uri
+            GROUP BY domain_id, request_method, request_uri
             ORDER BY frequency DESC;", ip_address)
     )).await.unwrap();
 

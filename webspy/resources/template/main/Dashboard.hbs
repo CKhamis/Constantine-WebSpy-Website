@@ -127,31 +127,34 @@
             }
 
             // Query database for reports
-            Promise.all([fetch('/api/report/user/' + ip), fetch('/api/analytics/endpoint-requests/' + ip), fetch('/api/analytics/domain-requests/' + ip)])
+            Promise.all([fetch('/api/report/user/' + ip), fetch('/api/analytics/endpoint-requests/' + ip), fetch('/api/analytics/domain-requests/' + ip), fetch('/api/analytics/daily-requests-by-domain/' + ip)])
                     .then(responses => {
                         const response1 = checkStatus(responses[0]);
                         const response2 = checkStatus(responses[1]);
                         const response3 = checkStatus(responses[2]);
+                        const response4 = checkStatus(responses[3]);
 
-                        return Promise.all([response1, response2, response3]);
+                        return Promise.all([response1, response2, response3, response4]);
                     })
                     .then(data => {
                         let response1 = data[0].json();
                         let response2 = data[1].json();
                         let response3 = data[2].json();
+                        let response4 = data[3].json();
 
-                        return Promise.all([response1, response2, response3]);
+                        return Promise.all([response1, response2, response3, response4]);
                     })
                     .then(data => {
                         let userReports = data[0];
                         let requestFrequency = data[1];
                         let domainFrequency = data[2];
+                        let dailyDomainFrequency = data[3];
                         let lastSeen = formatDate(userReports[0].timestamp);
                         let firstSeen = formatDate(userReports[userReports.length-1].timestamp);
 
                         let topEndpoints = "";
                         for(let i = 0; i < requestFrequency.length && i < 4; i++){
-                            topEndpoints += `<p class="mb-1"><strong>${requestFrequency[i][1]}</strong>: ${requestFrequency[i][0]}</p>`;
+                            topEndpoints += `<p class="mb-1"><strong>${requestFrequency[i][3]}</strong>: ${createMethodBadge(requestFrequency[i][2])} ${requestFrequency[i][1]}</p>`;
                         }
 
                         // Report table
@@ -162,9 +165,9 @@
                                         <th scope="col">Domain</th>
                                         <th scope="col">Timestamp</th>
                                         <th scope="col">url</th>
-                                        <th scope="col">method</th>
-                                        <th scope="col">header</th>
-                                        <th scope="col">protocol</th>
+                                        <th scope="col">Method</th>
+                                        <th scope="col">Header</th>
+                                        <th scope="col">Protocol</th>
                                         <th scope="col">Locale</th>
                                     </tr>
                                 </thead>
@@ -176,7 +179,7 @@
                                 <th scope="row">${request.domain_id}</th>
                                 <td>${request.timestamp}</td>
                                 <td>${request.request_url}</td>
-                                <td>${request.request_method}</td>
+                                <td>${createMethodBadge(request.request_method)}</td>
                                 <td>${request.request_header}</td>
                                 <td>${request.request_protocol}</td>
                                 <td>${request.client_locale}</td>
@@ -190,7 +193,9 @@
                             <table class="table table-dark table-striped table-responsive">
                                 <thead class="table-dark">
                                     <tr>
+                                        <th scope="col">Domain</th>
                                         <th scope="col">Endpoint</th>
+                                        <th scope="col">Method</th>
                                         <th scope="col">Frequency</th>
                                     </tr>
                                 </thead>
@@ -200,7 +205,9 @@
                             endpointTable += `
                             <tr>
                                 <th scope="row">${request[0]}</th>
-                                <td>${request[1]}</td>
+                                <td>${request[1]}</th>
+                                <td>${createMethodBadge(request[2])}</td>
+                                <td>${request[3]}</td>
                             </tr>
                             `;
                         });
@@ -227,6 +234,29 @@
                             `;
                         });
                         domainTable += `</tbody></table>`;
+
+                        // User activity table
+                        let userActivityTable = `
+                            <table class="table table-dark table-striped table-responsive">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Domain</th>
+                                        <th scope="col">Timestamp</th>
+                                        <th scope="col">Requests</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                        dailyDomainFrequency.forEach((request) => {
+                            userActivityTable += `
+                            <tr>
+                                <th scope="row">${request[0]}</th>
+                                <td>${request[1]}</th>
+                                <td>${request[2]}</td>
+                            </tr>
+                            `;
+                        });
+                        userActivityTable += `</tbody></table>`;
 
 
                         container.innerHTML = `
@@ -290,11 +320,15 @@
                                           <li class="nav-item" role="presentation">
                                             <button class="nav-link" id="domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#domain-frequency-tab-pane" type="button" role="tab" aria-controls="domain-frequency-tab-pane" aria-selected="false">Domain Frequency</button>
                                           </li>
+                                          <li class="nav-item" role="presentation">
+                                              <button class="nav-link" id="daily-domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#daily-domain-frequency-tab-pane" type="button" role="tab" aria-controls="daily-domain-frequency-tab-pane" aria-selected="false">User Activity</button>
+                                          </li>
                                         </ul>
                                         <div class="tab-content" id="myTabContent">
-                                          <div class="tab-pane fade show active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0">${reportTable}</div>
-                                          <div class="tab-pane fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0">${endpointTable}</div>
-                                          <div class="tab-pane fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
+                                          <div class="tab-pane fade show overflow-auto active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0">${reportTable}</div>
+                                          <div class="tab-pane overflow-auto fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0">${endpointTable}</div>
+                                          <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
+                                          <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${userActivityTable}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -338,6 +372,21 @@
         }
         return `<span class="${badgeClass}">${status}</span>`;
     };
+    const createMethodBadge = (status) => {
+            let badgeClass = '';
+            switch (status) {
+                case 'GET':
+                    badgeClass = 'badge text-bg-info';
+                    break;
+                case 'POST':
+                    badgeClass = 'badge text-bg-warning';
+                    break;
+                default:
+                    badgeClass = 'badge text-bg-secondary';
+                    break;
+            }
+            return `<span class="${badgeClass}">${status}</span>`;
+        };
     function userLookup(ip){
         return userList.find(user => user.ip === ip);
     }

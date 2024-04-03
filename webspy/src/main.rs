@@ -73,6 +73,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_report_by_user)
             .service(get_endpoint_frequency_by_user)
             .service(get_endpoint_frequency)
+            .service(daily_requests_by_user_by_domain)
             // .service(new_ban)
             // .service(all_bans)
             .service(actix_files::Files::new("/static", "./webspy/resources/static"))
