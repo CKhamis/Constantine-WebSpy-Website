@@ -68,6 +68,8 @@ async fn main() -> std::io::Result<()> {
             .service(get_all_users)
             .service(daily_requests)
             .service(daily_requests_by_user)
+            .service(domain_requests)
+            .service(domain_requests_by_user)
             .service(get_report_by_user)
             // .service(new_ban)
             // .service(all_bans)
