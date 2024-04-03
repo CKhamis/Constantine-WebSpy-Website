@@ -177,7 +177,7 @@
                             reportTable += `
                             <tr>
                                 <th scope="row">${request.domain_id}</th>
-                                <td>${request.timestamp}</td>
+                                <td>${formatDateTime(request.timestamp)}</td>
                                 <td>${request.request_url}</td>
                                 <td>${createMethodBadge(request.request_method)}</td>
                                 <td>${request.request_header}</td>
@@ -251,7 +251,7 @@
                             userActivityTable += `
                             <tr>
                                 <th scope="row">${request[0]}</th>
-                                <td>${request[1]}</th>
+                                <td>${formatDateTime(request[1])}</th>
                                 <td>${request[2]}</td>
                             </tr>
                             `;
@@ -300,12 +300,12 @@
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <div class="px-3 py-3 rounded-3 bg-dark d-flex justify-content-between">
+                                    <div class="px-3 py-3 rounded-3 d-flex justify-content-between ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}">
                                         <div>
                                             <h2 class="fw-bold">Conditional Access</h2>
                                         </div>
-                                        <div>rat</div>
-                                        <div>rat</div>
+                                        <div>${hasAlreadyPassed(user.expire)? "<h2>Traffic Allowed</h2>" : "<h2>Traffic Denied</h2>"}</div>
+                                        ${hasAlreadyPassed(user.expire)? "" : "<div>" + user.reason + "</div>"}
                                     </div>
                                 </div>
                                 <div class="col-12 mb-2">
@@ -318,10 +318,10 @@
                                             <button class="nav-link" id="endpoint-frequency-tab" data-bs-toggle="tab" data-bs-target="#endpoint-frequency-tab-pane" type="button" role="tab" aria-controls="endpoint-frequency-tab-pane" aria-selected="false">Endpoint Frequency</button>
                                           </li>
                                           <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#domain-frequency-tab-pane" type="button" role="tab" aria-controls="domain-frequency-tab-pane" aria-selected="false">Domain Frequency</button>
+                                            <button class="nav-link" id="domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#domain-frequency-tab-pane" type="button" role="tab" aria-controls="domain-frequency-tab-pane" aria-selected="false">Total Domain Frequency</button>
                                           </li>
                                           <li class="nav-item" role="presentation">
-                                              <button class="nav-link" id="daily-domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#daily-domain-frequency-tab-pane" type="button" role="tab" aria-controls="daily-domain-frequency-tab-pane" aria-selected="false">User Activity</button>
+                                              <button class="nav-link" id="daily-domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#daily-domain-frequency-tab-pane" type="button" role="tab" aria-controls="daily-domain-frequency-tab-pane" aria-selected="false">Daily Domain Frequency</button>
                                           </li>
                                         </ul>
                                         <div class="tab-content" id="myTabContent">
@@ -396,6 +396,26 @@
         const dd = String(date.getDate()).padStart(2, '0');
         const yyyy = date.getFullYear();
         return `${mm}/${dd}/${yyyy}`;
+    }
+    function formatDateTime(dateTimeString) {
+        const dateTime = new Date(dateTimeString);
+        const mm = String(dateTime.getMonth() + 1).padStart(2, '0');
+        const dd = String(dateTime.getDate()).padStart(2, '0');
+        const yyyy = dateTime.getFullYear();
+        const hours = String(dateTime.getHours()).padStart(2, '0');
+        const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+        const seconds = String(dateTime.getSeconds()).padStart(2, '0');
+        return `${mm}/${dd}/${yyyy} ${hours}:${minutes}:${seconds}`;
+    }
+    function hasAlreadyPassed(dateTimeString) {
+        // Convert the input date and time string to a Date object
+        const inputDate = new Date(dateTimeString);
+
+        // Get the current date and time
+        const currentDate = new Date();
+
+        // Compare the input date with the current date
+        return inputDate < currentDate;
     }
 </script>
 </body>
