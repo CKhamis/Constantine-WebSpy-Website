@@ -4,7 +4,7 @@ use std::sync::RwLock;
 use actix_web::{App, HttpServer, web};
 use handlebars::Handlebars;
 use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema};
-use webspy::controller::analytics_controller::daily_requests;
+use webspy::controller::analytics_controller::*;
 use webspy::controller::controller_prelude::*;
 use webspy::controller::domain_controller::{all_domains, new_domain};
 use webspy::controller::report_controller::{get_report_by_user, report_request};
@@ -67,6 +67,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_all_users_by_activity)
             .service(get_all_users)
             .service(daily_requests)
+            .service(daily_requests_by_user)
             .service(get_report_by_user)
             // .service(new_ban)
             // .service(all_bans)
