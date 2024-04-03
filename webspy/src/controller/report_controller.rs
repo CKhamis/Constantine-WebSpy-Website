@@ -1,15 +1,9 @@
-use std::future::Future;
-use std::ops::Sub;
 use actix_web::http::header::ContentType;
 use actix_web::{get, HttpResponse, post, Responder, web};
-use chrono::{Days, TimeZone};
-use sea_orm::DbErr;
-use sea_orm::prelude::DateTime;
 use sqlx::types::chrono::Local;
 use crate::data_transfer_object::ban_response::BanResponse;
 use crate::data_transfer_object::new_user::NewUser;
 use crate::data_transfer_object::report::Report;
-use crate::model::user::Model;
 use crate::service::AppState;
 use crate::service::user_service::{active_users, new_user, user_check};
 use crate::service::report_service::{find_by_user, save_request, verify_domain};
