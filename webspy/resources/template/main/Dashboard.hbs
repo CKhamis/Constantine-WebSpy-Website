@@ -358,7 +358,39 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                         <div class="modal-body">
-                                            <p>Modal body text goes here.</p>
+                                            <div class="row">
+                                                <div class="col-12 mb-3">
+                                                    <label for="nicknameInput" class="form-label">Nickname</label>
+                                                    <input type="text" class="form-control" id="nicknameInput">
+                                                </div>
+                                                <div class="col-12 mb-3">
+                                                    <label for="threatLevel" class="form-label">User Access</label>
+                                                        <select class="form-select" id="threatLevel">
+                                                            <option value="none" selected>Keep the same</option>
+                                                            <option value="delete">Remove Ban</option>
+                                                            <option value="week-1">Ban 1 week</option>
+                                                            <option value="month-1">Ban 1 month</option>
+                                                            <option value="month-6">Ban 6 months</option>
+                                                            <option value="year-1">Ban 1 year</option>
+                                                            <option value="year-2">Ban 2 years</option>
+                                                            <option value="year-100">Ban 100 years</option>
+                                                        </select>
+                                                </div>
+                                                <div class="col-12 mb-3">
+                                                    <label for="threatLevel" class="form-label">Threat Level</label>
+                                                    <select class="form-select" id="threatLevel">
+                                                        <option selected>Choose threat level</option>
+                                                        <option value="3">Not Assessed</option>
+                                                        <option value="2">Normal</option>
+                                                        <option value="1">Suspicious</option>
+                                                        <option value="0">Threat</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-12 mb-3">
+                                                    <label for="banReason" class="form-label">Ban Reason</label>
+                                                    <textarea class="form-control" id="banReason" rows="3"></textarea>
+                                                </div>
+                                            </div>
                                         </div>
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
