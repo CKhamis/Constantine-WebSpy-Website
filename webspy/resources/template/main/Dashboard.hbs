@@ -85,9 +85,10 @@
         userList.forEach((user) => {
             let htmlDomain = `
                 <div class="col mb-4">
-                    <div class="px-3 py-3 rounded-3 bg-dark" onclick="viewUser('${user.ip}')">
+                    <div class="px-3 py-3 rounded-3 ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}" onclick="viewUser('${user.ip}')">
                         <h3>${user.ip}</h3>
-                        <p>${user.nickname !== 'null' ? "No Name" : user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
+                        <p class="mb-0">${user.nickname !== 'null' ? "No Name" : user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
+                        ${hasAlreadyPassed(user.expire)? "<p>Access Accepted</p>" : "<p>Access Denied</p>"}
                     </div>
                 </div>
             `;
@@ -150,9 +151,9 @@
                         let requestFrequency = data[1];
                         let domainFrequency = data[2];
                         let dailyDomainFrequency = data[3];
-                        let lastSeen = formatDate(userReports[0].timestamp);
-                        let firstSeen = formatDate(userReports[userReports.length-1].timestamp);
-
+                        let lastSeen = userReports.length === 0? `N/A` : formatDate(userReports[0].timestamp);
+                        let firstSeen = formatDate(user.first_seen);
+                        let numBlocked = 0;
                         let topEndpoints = "";
                         for(let i = 0; i < requestFrequency.length && i < 4; i++){
                             topEndpoints += `<p class="mb-1"><strong>${requestFrequency[i][3]}</strong>: ${createMethodBadge(requestFrequency[i][2])} ${requestFrequency[i][1]}</p>`;
@@ -164,6 +165,7 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col">Domain</th>
+                                        <th scope="col">Access</th>
                                         <th scope="col">Timestamp</th>
                                         <th scope="col">url</th>
                                         <th scope="col">Method</th>
@@ -178,6 +180,7 @@
                             reportTable += `
                             <tr>
                                 <th scope="row">${request.domain_id}</th>
+                                <td>${request.blocked? "<span class='badge text-bg-danger'>Denied</span>" : "<span class='badge text-bg-success'>Allow</span>"}</td>
                                 <td>${formatDateTime(request.timestamp)}</td>
                                 <td>${request.request_url}</td>
                                 <td>${createMethodBadge(request.request_method)}</td>
@@ -186,6 +189,9 @@
                                 <td>${request.client_locale}</td>
                             </tr>
                             `;
+                            if(request.blocked){
+                                numBlocked++;
+                            }
                         });
                         reportTable += `</tbody></table>`;
 
@@ -266,8 +272,16 @@
                         </div>
                         <div class="container-fluid">
                             <div class="row">
-                                <div class="col-4 mb-2"><a class="text-secondary fs-4" onclick="renderAllUsers()">&lt; All Users</a></div>
-                                <div class="col-8 mb-2"><a class="text-secondary fs-4 float-end">Edit User</a></div>
+                                <div class="col-12 mb-2 d-flex align-items-center justify-content-between">
+                                    <div><a class="text-secondary fs-4" onclick="renderAllUsers()">&lt; All Users</a></div>
+                                    <div><a class="text-secondary fs-4" onclick="viewUser('${user.ip}')">Refresh</a></div>
+                                    <div>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                                          Edit User
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark">
                                         <h3 class="text-center fw-bold">${user.ip}</h3>
@@ -301,11 +315,11 @@
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <div class="px-3 py-3 rounded-3 d-flex justify-content-between ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}">
+                                    <div class="px-3 py-3 rounded-3 d-flex align-items-center justify-content-between ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}">
                                         <div>
                                             <h2 class="fw-bold">Conditional Access</h2>
                                         </div>
-                                        <div>${hasAlreadyPassed(user.expire)? "<h2>Traffic Allowed</h2>" : "<h2>Traffic Denied</h2>"}</div>
+                                        <div>${hasAlreadyPassed(user.expire)? "<h2>Traffic Allowed</h2>" : "<h5 class='text-center fw-bold'>Blocked Requests</h5><p class='fs-3 mb-0 text-center'>" + numBlocked + "</p>"}</div>
                                         ${hasAlreadyPassed(user.expire)? "" : "<div>" + user.reason + "</div>"}
                                     </div>
                                 </div>
@@ -331,6 +345,24 @@
                                           <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
                                           <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${userActivityTable}</div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Edit User Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                        <div class="modal-body">
+                                            <p>Modal body text goes here.</p>
+                                        </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-primary">Save changes</button>
                                     </div>
                                 </div>
                             </div>

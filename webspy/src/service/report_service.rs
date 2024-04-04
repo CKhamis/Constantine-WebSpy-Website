@@ -23,7 +23,7 @@ pub async fn find_by_user(user_ip: &String, conn: &DatabaseConnection) -> Vec<Mo
         .all(conn).await.unwrap()
 }
 
-pub async fn save_request(report: &web::Json<Report>, db: &web::Data<AppState>) -> Result<Model, DbErr> {
+pub async fn save_request(report: &web::Json<Report>, blocked: bool, db: &web::Data<AppState>) -> Result<Model, DbErr> {
     let incoming_request = crate::model::request::ActiveModel{
         id: ActiveValue::NotSet,
         ip: ActiveValue::Set(report.ip.to_string()),
@@ -39,6 +39,7 @@ pub async fn save_request(report: &web::Json<Report>, db: &web::Data<AppState>) 
         request_header: ActiveValue::Set(report.request_header.to_string()),
         request_protocol: ActiveValue::Set(report.request_protocol.to_string()),
         request_scheme: ActiveValue::Set(report.request_scheme.to_string()),
+        blocked: ActiveValue::Set(blocked),
         timestamp: ActiveValue::Set(Local::now()),
         domain_id: ActiveValue::Set(report.domain_id.clone()),
     };

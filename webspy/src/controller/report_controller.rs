@@ -11,14 +11,6 @@ use crate::service::report_service::{find_by_user, save_request, verify_domain};
 #[post("/report")]
 pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppState>) -> impl Responder {
     println!("/report received request");
-    match save_request(&report, &app_state).await{
-        Ok(a) => {
-            //println!("{:?}", a);
-        }
-        Err(a) => {
-            println!("{}", a);
-        }
-    }
 
     // Check if domain is in database
     if !verify_domain(&report.domain_id, &app_state.conn).await{
@@ -47,6 +39,16 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
                         expire: Local::now()
                     };
 
+                    // Save request
+                    match save_request(&report, false, &app_state).await{
+                        Ok(a) => {
+                            //println!("{:?}", a);
+                        }
+                        Err(a) => {
+                            println!("{}", a);
+                        }
+                    }
+
                     // Return response
                     let ser_response = serde_json::to_string(&best_response).unwrap();
                     HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
@@ -68,6 +70,16 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
                         expire: expire_date
                     };
 
+                    // Save request
+                    match save_request(&report, true, &app_state).await{
+                        Ok(a) => {
+                            //println!("{:?}", a);
+                        }
+                        Err(a) => {
+                            println!("{}", a);
+                        }
+                    }
+
                     let ser_response = serde_json::to_string(&bad_response).unwrap();
                     HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
                 }else{
@@ -77,6 +89,16 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
                         message: format!("User is not banned anymore. Old reason: {}", user.reason.unwrap_or("No reason given".to_string())),
                         expire: expire_date
                     };
+
+                    // save request
+                    match save_request(&report, false, &app_state).await{
+                        Ok(a) => {
+                            //println!("{:?}", a);
+                        }
+                        Err(a) => {
+                            println!("{}", a);
+                        }
+                    }
 
                     let ser_response = serde_json::to_string(&ok_response).unwrap();
                     HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
@@ -88,6 +110,15 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
                     message: "User was not banned".to_string(),
                     expire: Local::now()
                 };
+
+                match save_request(&report, false, &app_state).await{
+                    Ok(a) => {
+                        //println!("{:?}", a);
+                    }
+                    Err(a) => {
+                        println!("{}", a);
+                    }
+                }
 
                 let ser_response = serde_json::to_string(&ok_response).unwrap();
                 HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)

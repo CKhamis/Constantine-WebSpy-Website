@@ -28,6 +28,7 @@ pub struct Model{
     pub request_header:String,
     pub request_protocol:String,
     pub request_scheme:String,
+    pub blocked:bool,
     pub timestamp:DateTimeLocal,
     pub domain_id: String,
 }
@@ -61,6 +62,7 @@ pub enum Column {
     RequestHeader,
     RequestProtocol,
     RequestScheme,
+    Blocked,
     Timestamp,
     DomainId,
 }
@@ -84,6 +86,7 @@ impl ColumnTrait for crate::model::request::Column {
             Column::RequestHeader => ColumnType::Text.def(),
             Column::RequestProtocol => ColumnType::Text.def(),
             Column::RequestScheme => ColumnType::Text.def(),
+            Column::Blocked => ColumnType::Boolean.def(),
             Column::Timestamp => ColumnType::Timestamp.def(),
             Column::DomainId => ColumnType::String(Some(255)).def()
         }
