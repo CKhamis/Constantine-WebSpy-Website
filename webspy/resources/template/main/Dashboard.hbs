@@ -15,7 +15,13 @@
 
     let domainList, userList;
 
-    refresh();
+    init();
+
+    function init(){
+        refresh();
+        renderHomeOverview()
+    }
+
     function refresh(){
         const contentFetch = fetch("/api/domain/all");
         const userFetch = fetch("/api/user/all");
@@ -37,7 +43,6 @@
                     domainList = data[0];
                     userList = data[1];
                     populateNavBar();
-                    renderHomeOverview();
                 })
                 .catch((response)=>{
                     console.log(response);
@@ -57,7 +62,7 @@
         let htmlContent = `<li><a onclick="" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Overview</a></li>`;
         domainList.forEach((domain) => {
             let htmlDomain = `
-                <li><a onclick="viewDomain(${domain.id})" class="link-body-emphasis d-inline-flex text-decoration-none rounded">${domain.name}</a></li>
+                <li><a onclick="viewDomain('${domain.domain}')" class="link-body-emphasis d-inline-flex text-decoration-none rounded">${domain.name}</a></li>
             `;
             htmlContent+= htmlDomain;
         });
@@ -70,6 +75,26 @@
         let htmlContent = `
         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
             <h2 class="fw-bold fs-1">Traffic Overview</h2>
+        </div>
+        `;
+
+        container.innerHTML = htmlContent;
+    }
+
+    function viewDomain(domainId){
+        let container = document.querySelector("#main-content");
+
+        let domain = domainLookup(domainId);
+
+        console.log(domain)
+        if(domain.domain == null){
+            // domain not found
+            viewCreateDomain("Domain not found");
+        }
+
+        let htmlContent = `
+        <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+            <h2 class="fw-bold fs-1">${domain.name}</h2>
         </div>
         `;
 
@@ -102,8 +127,16 @@
         container.innerHTML = htmlContent;
     }
 
-    function viewCreateDomain(err=''){
+    function viewCreateDomain(message='', success=true){
         let container = document.querySelector("#main-content");
+
+        let alert = "";
+        if(!success){
+            alert = `<div class='alert alert-danger alert-dismissible fade show mt-3'>${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+        }else if(message !== ""){
+            alert = `<div class='alert alert-success alert-dismissible fade show mt-3'>${message}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>`;
+        }
+
         let htmlContent =`
         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
             <h2 class="fw-bold fs-1">Add New Domain</h2>
@@ -112,11 +145,14 @@
             <div class="row">
                 <div class="col-md-6 offset-md-3 p-4">
                     <h2 class="fw-bold text-center mb-2">Enter Domain Information</h2>
-                    ${err != ""? `<div class='alert alert-danger alert-dismissible fade show'>${err}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>` : ""}
-                    <label for="user-lookup-form" class="form-label">IP address of user</label>
-                    <input class="form-control form-control-lg" id="user-lookup-form" type="text" placeholder="192.168.0.1" aria-describedby="ipHelper">
-                    <div id="ipHelper" class="form-text">ID must be exact</div>
-                    <button class="btn btn-primary mb-3 mt-3" onclick="searchUserButton()">Search User</button>
+                    ${alert}
+                    <label for="domain-name-form" class="form-label">Domain Nickname</label>
+                    <input class="form-control form-control-lg mb-3" id="domain-name-form" type="text" placeholder="Costi Online">
+
+                    <label for="domain-form" class="form-label">Domain</label>
+                    <input class="form-control form-control-lg" id="domain-form" type="text" placeholder="costionline.com" aria-describedby="domain-form-helper">
+                    <div id="domain-form-helper" class="form-text">Domain must be exact</div>
+                    <button class="btn btn-primary mb-3 mt-3" onclick="newDomain()">Add Domain</button>
                 </div>
             </div>
         </div>
@@ -515,6 +551,35 @@
 </script>
 
 <script>
+    // Functions that write to database
+
+    function newDomain(){
+        let domainData = {
+            "name":document.querySelector("#domain-name-form").value,
+            "url": document.querySelector("#domain-form").value
+        };
+
+        let headers = new Headers();
+        headers.append('Content-Type', 'application/json');
+
+        let options = {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify(domainData)
+        };
+
+        fetch("/api/domain/new", options)
+                .then(checkStatus)
+                .then(response => response.json())
+                .then(usableResponse => {
+                    refresh();
+                    console.log(usableResponse);
+                    viewCreateDomain(usableResponse.message, usableResponse.success);
+                });
+    }
+</script>
+
+<script>
     const createBadge = (status) => {
         let badgeClass = '';
         switch (status) {
@@ -553,6 +618,9 @@
         };
     function userLookup(ip){
         return userList.find(user => user.ip === ip);
+    }
+    function domainLookup(domain_id){
+        return domainList.find(domain => domain.domain === domain_id);
     }
     function formatDate(dateString) {
         const date = new Date(dateString);

@@ -1,6 +1,10 @@
 use actix_web::{get, HttpResponse, post, Responder, web};
+use actix_web::error::UrlencodedError::Serialize;
 use actix_web::http::header::ContentType;
+use sea_orm::ColumnType::Json;
+use serde_json::json;
 use crate::data_transfer_object::new_domain::NewDomain;
+use crate::data_transfer_object::status_message::StatusMessage;
 use crate::service::AppState;
 use crate::service::domain_service::{get_domains, save_domain};
 
@@ -8,12 +12,23 @@ use crate::service::domain_service::{get_domains, save_domain};
 pub async fn new_domain(new_domain: web::Json<NewDomain>, db: web::Data<AppState>) -> impl Responder {
     match save_domain(&new_domain, db).await{
         Ok(a) => {
-            println!("{:?}", a);
-            HttpResponse::Ok().body(format!("New domain added: {} \t {} \t at {}", a.name, a.domain, a.timestamp))
+            let response = StatusMessage{
+                success: true,
+                message: format!("Domain has been added: {}", a.name)
+            };
+            HttpResponse::Ok()
+                .insert_header(ContentType::json())
+                .body(json!(response).to_string()) //todo: (cory) check if this is good practice
         }
         Err(a) => {
             println!("{}", a);
-            HttpResponse::BadRequest().body(format!("OOOOOPS! There was an error: {}", a.to_string()))
+            let response = StatusMessage{
+                success: false,
+                message: a.to_string()
+            };
+            HttpResponse::Ok()
+                .insert_header(ContentType::json())
+                .body(json!(response).to_string())
         }
     }
 }
