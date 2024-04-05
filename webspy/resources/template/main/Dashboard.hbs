@@ -61,7 +61,7 @@
             `;
             htmlContent+= htmlDomain;
         });
-        htmlContent += `<li><a onclick="viewCreateDomain()" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Add Domain</a></li>`;
+        htmlContent += `<li><a onclick="viewCreateDomain('')" class="link-body-emphasis d-inline-flex text-decoration-none rounded">Add Domain</a></li>`;
         container.innerHTML = htmlContent;
     }
 
@@ -99,6 +99,28 @@
             htmlContent+= htmlDomain;
         });
         htmlContent += `</div></div>`;
+        container.innerHTML = htmlContent;
+    }
+
+    function viewCreateDomain(err=''){
+        let container = document.querySelector("#main-content");
+        let htmlContent =`
+        <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+            <h2 class="fw-bold fs-1">Add New Domain</h2>
+        </div>
+        <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;">
+            <div class="row">
+                <div class="col-md-6 offset-md-3 p-4">
+                    <h2 class="fw-bold text-center mb-2">Enter Domain Information</h2>
+                    ${err != ""? `<div class='alert alert-danger alert-dismissible fade show'>${err}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>` : ""}
+                    <label for="user-lookup-form" class="form-label">IP address of user</label>
+                    <input class="form-control form-control-lg" id="user-lookup-form" type="text" placeholder="192.168.0.1" aria-describedby="ipHelper">
+                    <div id="ipHelper" class="form-text">ID must be exact</div>
+                    <button class="btn btn-primary mb-3 mt-3" onclick="searchUserButton()">Search User</button>
+                </div>
+            </div>
+        </div>
+        `;
         container.innerHTML = htmlContent;
     }
 
@@ -289,7 +311,7 @@
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
                                         <h1 class="text-center fw-bold">${user.ip}</h1>
-                                        <h5 class="text-center fw-bold mb-3">${user.nickname !== 'null' ? "No name" : user.nickname}</h5>
+                                        <h5 class="text-center fw-bold mb-5">${user.nickname !== 'null' ? "No name" : user.nickname}</h5>
                                         <p class="text-center fs-4">${createBadge(user.threat_level)}</p>
                                         <p class="fw-bold text-center fs-4">Total Requests: ${userReports.length}</p>
                                     </div>
@@ -320,7 +342,7 @@
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                        <h4 class="fw-bold text-center">Domain Activity</h4>
+                                        <h5 class="fw-bold text-center">Domain Activity</h5>
                                         <canvas id="domain-chart"></canvas>
                                     </div>
                                 </div>
@@ -462,7 +484,7 @@
                         });
 
                         let domainChart = new Chart(domainCanvas, {
-                            type:'pie',
+                            type:'doughnut',
                             data:{
                                 labels:domainList,
                                 datasets:[{
