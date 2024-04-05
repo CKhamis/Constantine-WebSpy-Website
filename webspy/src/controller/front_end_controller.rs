@@ -4,10 +4,12 @@ use crate::HANDLEBARS_TEMPLATE;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use handlebars::Handlebars;
 use serde_json::json;
+use tracing::info;
 
 #[get("/")]
 #[tracing::instrument]
 pub async fn index(db: web::Data<AppState>) -> impl Responder {
+    info!("Handling index page request");
     let reg = HANDLEBARS_TEMPLATE.read().unwrap();
     let model = json!({
         "title": "Home",
@@ -26,6 +28,7 @@ pub async fn index(db: web::Data<AppState>) -> impl Responder {
 #[get("/dashboard")]
 #[tracing::instrument]
 pub async fn dashboard(db: web::Data<AppState>) -> impl Responder {
+    info!("Handling dashboard get request");
     let reg = HANDLEBARS_TEMPLATE.read().unwrap();
     let model = json!({
         "title": "Dashboard",

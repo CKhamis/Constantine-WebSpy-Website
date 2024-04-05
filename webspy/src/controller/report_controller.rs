@@ -1,6 +1,7 @@
 use actix_web::http::header::ContentType;
 use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::types::chrono::Local;
+use tracing::{error, info, warn};
 
 use crate::data_transfer_object::ban_response::BanResponse;
 use crate::data_transfer_object::new_user::NewUser;
@@ -15,15 +16,15 @@ pub async fn report_request(
     report: web::Json<Report>,
     app_state: web::Data<AppState>,
 ) -> impl Responder {
-    println!("/report received request");
+    info!("/report received request");
 
     // Check if domain is in database
     if !verify_domain(&report.domain_id, &app_state.conn).await {
-        print!("Received invalid API key for a request");
+        warn!("Received invalid API key for a request");
         return HttpResponse::BadRequest().body("Invalid report received. Rejected");
     }
 
-    println!(
+    info!(
         "User exists in database: {:?}",
         user_check(&report.ip, &app_state).await
     );
@@ -31,6 +32,7 @@ pub async fn report_request(
     // Check if user already exists in database and create if it doesn't
     match user_check(&report.ip, &app_state).await.map_or(None, |a| a) {
         None => {
+            info!("User did not exist");
             // user does not exist, create it
             let user = NewUser {
                 expire: None,
@@ -41,6 +43,7 @@ pub async fn report_request(
             // Save user
             match new_user(user, &app_state).await {
                 Ok(_) => {
+                    info!("New user created");
                     let best_response = BanResponse {
                         is_blocked: false,
                         message: "User is not banned.".to_string(),
@@ -50,27 +53,28 @@ pub async fn report_request(
                     // Save request
                     match save_request(&report, false, &app_state).await {
                         Ok(a) => {
-                            //println!("{:?}", a);
+                            info!("Request saved: {:?}", a);
                         }
                         Err(a) => {
-                            println!("{}", a);
+                            error!("Error saving request to database: {}", a);
                         }
                     }
 
                     // Return response
-                    let ser_response = serde_json::to_string(&best_response).unwrap();
+                    let ser_response = serde_json::to_string(&best_response).unwrap(); // TODO(costi): fix this unwrap using some form of destructuring statements
                     HttpResponse::Ok()
                         .insert_header(ContentType::json())
                         .body(ser_response)
                 }
                 Err(e) => {
-                    dbg!(&e);
+                    error!("Error saving new user to database: {}", e);
                     return HttpResponse::BadRequest()
                         .body(format!("OOOOOPS! There was an error :( {}", e));
                 }
             }
         }
         Some(user) => {
+            info!("User already exists");
             // user exists
             if let Some(expire_date) = user.expire {
                 if expire_date > Local::now() {
@@ -84,14 +88,15 @@ pub async fn report_request(
                     // Save request
                     match save_request(&report, true, &app_state).await {
                         Ok(a) => {
+                            info!("Request saved: {:?}", a);
                             //println!("{:?}", a);
                         }
                         Err(a) => {
-                            println!("{}", a);
+                            error!("Error saving request to database: {}", a);
                         }
                     }
 
-                    let ser_response = serde_json::to_string(&bad_response).unwrap();
+                    let ser_response = serde_json::to_string(&bad_response).unwrap(); // TODO(costi): fix this unwrap using some form of destructuring statements
                     HttpResponse::Ok()
                         .insert_header(ContentType::json())
                         .body(ser_response)
@@ -109,14 +114,14 @@ pub async fn report_request(
                     // save request
                     match save_request(&report, false, &app_state).await {
                         Ok(a) => {
-                            //println!("{:?}", a);
+                            info!("Request saved: {:?}", a);
                         }
                         Err(a) => {
-                            println!("{}", a);
+                            error!("Error saving request to database: {}", a);
                         }
                     }
 
-                    let ser_response = serde_json::to_string(&ok_response).unwrap();
+                    let ser_response = serde_json::to_string(&ok_response).unwrap(); // TODO(costi): fix this unwrap using some form of destructuring statements
                     HttpResponse::Ok()
                         .insert_header(ContentType::json())
                         .body(ser_response)
@@ -131,14 +136,14 @@ pub async fn report_request(
 
                 match save_request(&report, false, &app_state).await {
                     Ok(a) => {
-                        //println!("{:?}", a);
+                        info!("Request saved: {:?}", a);
                     }
                     Err(a) => {
-                        println!("{}", a);
+                        error!("Error saving request to database: {}", a);
                     }
                 }
 
-                let ser_response = serde_json::to_string(&ok_response).unwrap();
+                let ser_response = serde_json::to_string(&ok_response).unwrap(); // TODO(costi): fix this unwrap using some form of destructuring statements
                 HttpResponse::Ok()
                     .insert_header(ContentType::json())
                     .body(ser_response)
@@ -153,10 +158,20 @@ pub async fn get_report_by_user(
     ip_address: web::Path<String>,
     app_state: web::Data<AppState>,
 ) -> impl Responder {
+    info!("Handling get_report_by_user per ip address: {}", ip_address);
     match serde_json::to_string(&find_by_user(&ip_address, &app_state.conn).await) {
-        Ok(response) => HttpResponse::Ok()
-            .insert_header(ContentType::json())
-            .body(response),
-        Err(_) => HttpResponse::BadRequest().body("There was an error serializing"),
+        Ok(response) => {
+            info!(
+                "Successfully serialized report relating to user: {}",
+                response
+            );
+            HttpResponse::Ok()
+                .insert_header(ContentType::json())
+                .body(response)
+        }
+        Err(e) => {
+            error!("Error serializing report: {}", e);
+            HttpResponse::BadRequest().body("There was an error serializing")
+        }
     }
 }

@@ -4,6 +4,7 @@ use sea_orm::{
     QueryFilter, QueryOrder,
 };
 use sqlx::types::chrono::Local;
+use tracing::{error, info};
 
 use crate::data_transfer_object::report::Report;
 use crate::model::request::Model;
@@ -13,26 +14,45 @@ use crate::service::AppState;
 #[tracing::instrument]
 pub async fn find_all(conn: &DatabaseConnection) {
     let logs: Vec<Model> = request::Entity::find().all(conn).await.unwrap();
-    println!("{:?}", logs);
+    info!("All logs found: {:?}", logs);
+    // TODO(costi): function returns nothing
 }
 
 #[tracing::instrument]
 pub async fn verify_domain(url: &String, conn: &DatabaseConnection) -> bool {
-    domain::Entity::find_by_id(url)
+    info!("Domain being verified: {}", url);
+    let return_value = domain::Entity::find_by_id(url)
         .one(conn)
         .await
         .unwrap()
-        .is_some()
+        .is_some();
+
+    info!(
+        "Database query complete, domain verification output: {}",
+        return_value
+    );
+
+    return_value
 }
 
 #[tracing::instrument]
 pub async fn find_by_user(user_ip: &String, conn: &DatabaseConnection) -> Vec<Model> {
-    request::Entity::find()
+    info!("Finding user from database: {}", user_ip);
+    match request::Entity::find()
         .filter(request::Column::Ip.eq(user_ip))
         .order_by_desc(request::Column::Timestamp)
         .all(conn)
         .await
-        .unwrap()
+    {
+        Ok(v) => {
+            info!("Successfully found request by ip");
+            v
+        }
+        Err(e) => {
+            error!("Error finding request from database: {}", e);
+            vec![] // TODO(costi): empty output when database fails, unwrap was used, so this atleast is better
+        }
+    }
 }
 
 #[tracing::instrument]
@@ -82,5 +102,6 @@ pub async fn save_request(
         domain_id: ActiveValue::Set(report.domain_id.clone()),
     };
 
+    info!("Saving request to database: {:?}", incoming_request);
     incoming_request.insert(&db.conn).await
 }

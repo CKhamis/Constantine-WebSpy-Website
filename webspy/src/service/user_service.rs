@@ -10,14 +10,17 @@ use sea_orm::{
     ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DatabaseBackend, DbErr,
     EntityTrait, QueryFilter, QueryOrder, QueryResult, Statement,
 };
+use tracing::info;
 
 #[tracing::instrument]
 pub async fn user_check(ip: &String, db: &web::Data<AppState>) -> Result<Option<Model>, DbErr> {
+    info!("Checking user by ip address: {}", ip);
     user::Entity::find_by_id(ip).one(&db.conn).await
 }
 
 #[tracing::instrument]
 pub async fn all_users(db: &web::Data<AppState>) -> Vec<user::Model> {
+    info!("Querying all users in database");
     user::Entity::find()
         .order_by_desc(user::Column::FirstSeen)
         .all(&db.conn)
@@ -28,6 +31,7 @@ pub async fn all_users(db: &web::Data<AppState>) -> Vec<user::Model> {
 // type CoolRow = Vec<(String, Option<DateTimeLocal>)>;
 #[tracing::instrument]
 pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateTimeLocal>)> {
+    info!("Querying all active users");
     let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
@@ -40,6 +44,8 @@ pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateT
         .await
         .unwrap();
 
+    info!("Successfully queried database for active users");
+
     query_result_list
         .iter()
         .filter_map(|query_result| query_result.try_get_many_by_index().ok())
@@ -48,6 +54,7 @@ pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateT
 
 #[tracing::instrument]
 pub async fn banned_users(db: &web::Data<AppState>) -> Vec<user::Model> {
+    info!("Querying banned users");
     let now = Local::now();
     user::Entity::find()
         .filter(user::Column::Expire.is_not_null())
@@ -71,5 +78,6 @@ pub async fn new_user(new_user: NewUser, db: &web::Data<AppState>) -> Result<use
             .map_or(ActiveValue::NotSet, |a| ActiveValue::Set(Option::from(a))),
         threat_level: ActiveValue::Set(DangerLevel::NotAssessed),
     };
+    info!("Saving new user: {:?}", constructed_model);
     constructed_model.insert(&db.conn).await
 }

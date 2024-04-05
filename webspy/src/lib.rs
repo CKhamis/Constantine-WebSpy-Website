@@ -1,3 +1,4 @@
+// #![deny(clippy::unwrap_used)] // TODO(costi): uncomment if you dare
 use handlebars::Handlebars;
 use lazy_static::lazy_static;
 use std::sync::RwLock;
