@@ -1,7 +1,10 @@
-use sea_orm::{ColumnDef, ColumnTrait, ColumnType, ColumnTypeTrait, DeriveActiveModel, DeriveColumn, DeriveEntity, DeriveModel, EntityName, PrimaryKeyTrait};
-use sea_orm::{ActiveModelBehavior, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
-use sea_orm::DerivePrimaryKey;
 use sea_orm::prelude::DateTimeLocal;
+use sea_orm::DerivePrimaryKey;
+use sea_orm::{ActiveModelBehavior, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
+use sea_orm::{
+    ColumnDef, ColumnTrait, ColumnType, ColumnTypeTrait, DeriveActiveModel, DeriveColumn,
+    DeriveEntity, DeriveModel, EntityName, PrimaryKeyTrait,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Copy, Clone, Default, Debug, DeriveEntity)]
@@ -15,11 +18,10 @@ impl EntityName for Entity {
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveModel, DeriveActiveModel)]
-pub struct Model{
+pub struct Model {
     pub domain: String,
-    pub name:String,
-    pub timestamp:DateTimeLocal,
-
+    pub name: String,
+    pub timestamp: DateTimeLocal,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
@@ -33,7 +35,7 @@ pub enum Column {
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
 pub enum PrimaryKey {
     Domain, // define primary key manually, so we don't get any macro conflicts
-    // domain can be used here now since it's a `limited string` as defined in the column trait
+            // domain can be used here now since it's a `limited string` as defined in the column trait
 }
 
 impl PrimaryKeyTrait for PrimaryKey {
@@ -56,7 +58,8 @@ impl ColumnTrait for Column {
     type EntityName = Entity;
 
     fn def(&self) -> ColumnDef {
-        match self { // set all the types to be used by the domain model in the database's columns
+        match self {
+            // set all the types to be used by the domain model in the database's columns
             // Column::Id => ColumnType::BigUnsigned.def(), // this column for ID gets removed since we plan on using domain as the ID instead
             Column::Domain => ColumnType::String(Some(255)).def(), // this evaluates to varchar(255)
             Column::Name => ColumnType::Text.def(),
@@ -64,7 +67,6 @@ impl ColumnTrait for Column {
         }
     }
 }
-
 
 impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {

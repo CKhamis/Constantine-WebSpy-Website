@@ -1,7 +1,19 @@
 use sea_orm::{DeriveActiveEnum, EnumIter};
 use serde::{Deserialize, Serialize};
 
-#[derive(EnumIter, DeriveActiveEnum, Clone, Debug, Copy, Ord, PartialOrd, Eq, PartialEq, Serialize, Deserialize)]
+#[derive(
+    EnumIter,
+    DeriveActiveEnum,
+    Clone,
+    Debug,
+    Copy,
+    Ord,
+    PartialOrd,
+    Eq,
+    PartialEq,
+    Serialize,
+    Deserialize,
+)]
 #[sea_orm(rs_type = "i32", db_type = "Integer")]
 pub enum DangerLevel {
     #[sea_orm(num_value = 0)]
