@@ -9,6 +9,10 @@
 </main>
 {{> scripts}}
 <script>
+    Chart.defaults.plugins.legend.position = 'bottom';
+    Chart.defaults.plugins.legend.labels.color = 'white';
+    Chart.defaults.plugins.title.display = false;
+
     let domainList, userList;
 
     refresh();
@@ -155,8 +159,8 @@
                         let firstSeen = formatDate(user.first_seen);
                         let numBlocked = 0;
                         let topEndpoints = "";
-                        for(let i = 0; i < requestFrequency.length && i < 4; i++){
-                            topEndpoints += `<p class="mb-1"><strong>${requestFrequency[i][3]}</strong>: ${createMethodBadge(requestFrequency[i][2])} ${requestFrequency[i][1]}</p>`;
+                        for(let i = 0; i < requestFrequency.length && i < 9; i++){
+                            topEndpoints += `<p class="mb-2"><strong>${requestFrequency[i][3]}</strong>: ${createMethodBadge(requestFrequency[i][2])} ${requestFrequency[i][1]}</p>`;
                         }
 
                         // Report table
@@ -283,15 +287,18 @@
                                 </div>
 
                                 <div class="col-lg-4 col-12 mb-3">
-                                    <div class="px-3 py-3 rounded-3 bg-dark">
-                                        <h3 class="text-center fw-bold">${user.ip}</h3>
-                                        <h5 class="text-center fw-bold">${user.nickname !== 'null' ? "No name" : user.nickname}</h5>
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h1 class="text-center fw-bold">${user.ip}</h1>
+                                        <h5 class="text-center fw-bold mb-3">${user.nickname !== 'null' ? "No name" : user.nickname}</h5>
                                         <p class="text-center fs-4">${createBadge(user.threat_level)}</p>
                                         <p class="fw-bold text-center fs-4">Total Requests: ${userReports.length}</p>
                                     </div>
                                 </div>
                                 <div class="col-lg-8 col-12 mb-3">
-                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h4 class="fw-bold text-center">User Requests</h4>
+                                        <canvas id="activity-chart"></canvas>
+                                    </div>
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark dual-info-box h-100">
@@ -312,7 +319,10 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
-                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">graph</div>
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h4 class="fw-bold text-center">Domain Activity</h4>
+                                        <canvas id="domain-chart"></canvas>
+                                    </div>
                                 </div>
                                 <div class="col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 d-flex align-items-center justify-content-between ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}">
@@ -400,6 +410,68 @@
                             </div>
                         </div>
                     `;
+                        // Chart data
+                        let domainList = [];
+                        let domainRequestCount = [];
+
+                        domainFrequency.forEach((domain) => {
+                            domainList.push(domain[0]);
+                            domainRequestCount.push(domain[1]);
+                        });
+
+                        let dailyDomainFrequencyDatasets = domainList.map(domain => {
+                            let usageData = dailyDomainFrequency.map(day => ({
+                                x: new Date(day[1]),
+                                y: day[0] === domain? day[2] : 0
+                            }));
+
+                            console.log(usageData);
+
+                            return {
+                                label: domain,
+                                data: usageData
+                            }
+                        });
+
+
+                        let activityCanvas = document.querySelector("#activity-chart");
+                        let domainCanvas = document.querySelector("#domain-chart");
+
+
+
+                        let activityChart = new Chart(activityCanvas, {
+                            type:'line',
+                            data:{
+                                datasets: dailyDomainFrequencyDatasets
+                            },
+                            options: {
+                                plugins:{
+                                    title:{
+                                        text: "Terence"
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        type: 'time',
+                                        time:{
+                                            unit: 'day',
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        let domainChart = new Chart(domainCanvas, {
+                            type:'pie',
+                            data:{
+                                labels:domainList,
+                                datasets:[{
+                                    label:'Requests',
+                                    data:domainRequestCount
+                                }]
+                            },
+                            options:{}
+                        });
                     })
                     .catch((response)=>{
                         console.log(response);
