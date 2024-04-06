@@ -6,7 +6,7 @@ use crate::data_transfer_object::new_user::NewUser;
 use crate::data_transfer_object::report::Report;
 use crate::service::AppState;
 use crate::service::user_service::{active_users, new_user, user_check};
-use crate::service::report_service::{find_by_user, save_request, verify_domain};
+use crate::service::report_service::{find_by_domain, find_by_user, save_request, verify_domain};
 
 #[post("/report")]
 pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppState>) -> impl Responder {
@@ -130,6 +130,14 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
 #[get("/api/report/user/{ip}")]
 pub async fn get_report_by_user(ip_address: web::Path<String>, app_state: web::Data<AppState>) -> impl Responder{
     match serde_json::to_string(&find_by_user(&ip_address, &app_state.conn).await){
+        Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
+        Err(_) => {HttpResponse::BadRequest().body("There was an error serializing")}
+    }
+}
+
+#[get("/api/report/domain/{domain}")]
+pub async fn get_report_by_domain(domain: web::Path<String>, app_state: web::Data<AppState>) -> impl Responder{
+    match serde_json::to_string(&find_by_domain(&domain, &app_state.conn).await){
         Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
         Err(_) => {HttpResponse::BadRequest().body("There was an error serializing")}
     }

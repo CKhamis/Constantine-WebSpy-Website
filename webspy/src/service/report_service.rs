@@ -23,6 +23,13 @@ pub async fn find_by_user(user_ip: &String, conn: &DatabaseConnection) -> Vec<Mo
         .all(conn).await.unwrap()
 }
 
+pub async fn find_by_domain(domain: &String, conn: &DatabaseConnection) -> Vec<Model>{
+    request::Entity::find()
+        .filter(request::Column::DomainId.eq(domain))
+        .order_by_desc(request::Column::Timestamp)
+        .all(conn).await.unwrap()
+}
+
 pub async fn save_request(report: &web::Json<Report>, blocked: bool, db: &web::Data<AppState>) -> Result<Model, DbErr> {
     let incoming_request = crate::model::request::ActiveModel{
         id: ActiveValue::NotSet,
