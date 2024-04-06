@@ -71,7 +71,7 @@ pub async fn get_endpoint_frequency(db: web::Data<AppState>) -> impl Responder {
     }
 }
 
-#[get("/api/analytics/daily-requests/{ip_address}")]
+#[get("/api/analytics/daily-requests/user/{ip_address}")]
 #[tracing::instrument]
 pub async fn daily_requests_by_user(
     ip_address: web::Path<String>,
@@ -98,21 +98,20 @@ pub async fn daily_requests_by_user(
     }
 }
 
-#[get("/api/analytics/daily-requests-by-domain/{ip_address}")]
+#[get("/api/analytics/daily-requests-by-domain/user/{ip_address}")]
 #[tracing::instrument]
 pub async fn daily_requests_by_user_by_domain(
-    // TODO(costi): update this endpoint to be more consistent e.g. missing 'by user'
     ip_address: web::Path<String>,
     db: web::Data<AppState>,
 ) -> impl Responder {
     info!(
-        "Handling API request for daily-requests-by-domain for: {}",
+        "Handling API request for daily-requests-by-domain-user for: {}",
         ip_address
     );
     match serde_json::to_string(&daily_activity_by_user_by_domain(ip_address.trim(), &db).await) {
         Ok(response) => {
             info!(
-                "Successfully serialized daily-requests-by-domain to json: {}",
+                "Successfully serialized daily-requests-by-domain-user to json: {}",
                 response
             );
             HttpResponse::Ok()
@@ -121,7 +120,7 @@ pub async fn daily_requests_by_user_by_domain(
         }
         Err(e) => {
             error!(
-                "Error serializing daily-requests-by-domain data to json: {}",
+                "Error serializing daily-requests-by-domain-user data to json: {}",
                 e
             );
             HttpResponse::BadRequest().body("data could not be fetched")
@@ -129,7 +128,7 @@ pub async fn daily_requests_by_user_by_domain(
     }
 }
 
-#[get("/api/analytics/domain-requests/{ip_address}")]
+#[get("/api/analytics/domain-requests/user/{ip_address}")]
 #[tracing::instrument]
 pub async fn domain_requests_by_user(
     ip_address: web::Path<String>,
@@ -159,7 +158,7 @@ pub async fn domain_requests_by_user(
     }
 }
 
-#[get("/api/analytics/endpoint-requests/{ip_address}")]
+#[get("/api/analytics/endpoint-requests/user/{ip_address}")]
 #[tracing::instrument]
 pub async fn get_endpoint_frequency_by_user(
     ip_address: web::Path<String>,
