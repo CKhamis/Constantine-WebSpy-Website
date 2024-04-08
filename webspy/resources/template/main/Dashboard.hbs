@@ -188,6 +188,24 @@
                         `;
 
 
+
+                        let activityCanvas = document.querySelector("#domain-activity-canvas");
+                        let activityChart = new Chart(activityCanvas, {
+                            type:'line',
+                            data:{
+                                datasets: dailyDomainFrequencyDatasets
+                            },
+                            options: {
+                                scales: {
+                                    x: {
+                                        type: 'time',
+                                        time:{
+                                            unit: 'day',
+                                        }
+                                    }
+                                }
+                            }
+                        });
                     });
         }
     }
@@ -594,11 +612,6 @@
                                 datasets: dailyDomainFrequencyDatasets
                             },
                             options: {
-                                plugins:{
-                                    title:{
-                                        text: "Terence"
-                                    }
-                                },
                                 scales: {
                                     x: {
                                         type: 'time',
