@@ -3,10 +3,28 @@ use std::str::FromStr;
 use actix_web::web;
 use chrono::NaiveDate;
 use sea_orm::prelude::DateTimeLocal;
-use sea_orm::{ConnectionTrait, DatabaseBackend, DatabaseConnection, EntityTrait, QueryResult, Statement};
+use sea_orm::{ConnectionTrait, DatabaseBackend, DatabaseConnection, EntityOrSelect, EntityTrait, QueryResult, QuerySelect, Statement};
 use crate::model::request;
 use crate::model::request::Model;
 use crate::service::AppState;
+
+pub async fn unique_users_per_domain(db: &web::Data<AppState>) -> Vec<(String, i64)> {
+    let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
+        DatabaseBackend::MySql,
+        "
+            SELECT domain_id, COUNT(DISTINCT ip) AS unique_visitors
+            FROM web_spy.request
+            GROUP BY domain_id
+            ORDER BY unique_visitors;"
+    )).await.unwrap();
+
+
+    // NOTE: there is an issue with this function involving the timezone of MySQL and WebSpy.
+    // This can lead to differences in direct queries and WebSpy queries
+    query_result_list.iter().filter_map(|query_result| {
+        query_result.try_get_many_by_index().ok()
+    }).collect()
+}
 
 pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, i32)> {
     let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(

@@ -1,6 +1,6 @@
 use actix_web::{get, HttpResponse, Responder, web};
 use actix_web::http::header::ContentType;
-use crate::service::analytics_service::{daily_activity, daily_activity_by_user, daily_activity_by_user_by_domain, domain_activity, domain_activity_by_user, endpoint_frequency, endpoint_frequency_by_user};
+use crate::service::analytics_service::{daily_activity, daily_activity_by_user, daily_activity_by_user_by_domain, domain_activity, domain_activity_by_user, endpoint_frequency, endpoint_frequency_by_user, unique_users_per_domain};
 use crate::service::AppState;
 
 #[get("/api/analytics/daily-requests")]
@@ -55,6 +55,16 @@ pub async fn domain_requests_by_user(ip_address: web::Path<String>, db: web::Dat
 #[get("/api/analytics/endpoint-requests/{ip_address}")]
 pub async fn get_endpoint_frequency_by_user(ip_address: web::Path<String>, db: web::Data<AppState>) -> impl Responder{
     match serde_json::to_string(&endpoint_frequency_by_user(&ip_address, &db).await){
+        Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
+        Err(_) => {HttpResponse::BadRequest().body("data could not be fetched")}
+    }
+}
+
+// Domain Information
+#[get("/api/analytics/unique-users-all-domains")]
+pub async fn unique_visitors(db: web::Data<AppState>) -> impl Responder{
+    let data = unique_users_per_domain(&db).await;
+    match serde_json::to_string(&data){
         Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
         Err(_) => {HttpResponse::BadRequest().body("data could not be fetched")}
     }

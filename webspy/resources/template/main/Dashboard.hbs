@@ -13,7 +13,7 @@
     Chart.defaults.plugins.legend.labels.color = 'white';
     Chart.defaults.plugins.title.display = false;
 
-    let domainList, userList;
+    let domainList, userList, uniqueUsersPerDomain;
 
     init();
 
@@ -25,23 +25,27 @@
     function refresh(){
         const contentFetch = fetch("/api/domain/all");
         const userFetch = fetch("/api/user/all");
+        const uniqueUsersPerDomainFetch = fetch("/api/analytics/unique-users-all-domains");
 
-        Promise.all([contentFetch, userFetch])
+        Promise.all([contentFetch, userFetch, uniqueUsersPerDomainFetch])
                 .then(responses => {
                     const response1 = checkStatus(responses[0]);
                     const response2 = checkStatus(responses[1]);
+                    const response3 = checkStatus(responses[2]);
 
-                    return Promise.all([response1, response2]);
+                    return Promise.all([response1, response2, response3]);
                 })
                 .then(data => {
                     let response1 = data[0].json();
                     let response2 = data[1].json();
+                    let response3 = data[2].json();
 
-                    return Promise.all([response1, response2]);
+                    return Promise.all([response1, response2, response3]);
                 })
                 .then(data => {
                     domainList = data[0];
                     userList = data[1];
+                    uniqueUsersPerDomain = data[2];
                     populateNavBar();
                 })
                 .catch((response)=>{
@@ -110,11 +114,68 @@
                         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
                             <h2 class="fw-bold fs-1">${domain.name}</h2>
                         </div>
-                        <div class="row">
-                            <div class="col-12 mb-3">
-                                <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                    <h5 class="fs-5 fw-bold">Incoming Traffic</h5>
-                                    <canvas id="traffic-chart"></canvas>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h5 class="fw-bold text-center">Domain Activity</h5>
+                                        <canvas id="domain-activity-canvas"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h4 class="fw-bold text-center">Most Active User</h4>
+                                        <p class="fs-4 text-center mb-0">Poopsie</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h5 class="fw-bold text-center">Unique Users</h5>
+                                        <p class="fs-4 text-center mb-0">${uniqueUsersPerDomainLookup(domain.domain)}</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h5 class="fw-bold text-center">Most Active Country</h5>
+                                        <p class="fs-4 text-center mb-0">poop</p>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                        <h5 class="fw-bold text-center">Domain Activity</h5>
+                                        <canvas id="domain-chart"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <div class="px-3 py-3 rounded-3 d-flex align-items-center justify-content-between bg-dark">
+                                        <div>
+                                            <h2 class="fw-bold">Conditional Access</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-2">
+                                    <div class="py-3">
+                                        <ul class="nav nav-underline" id="myTab" role="tablist">
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="request-by-date-tab" data-bs-toggle="tab" data-bs-target="#request-by-date-tab-pane" type="button" role="tab" aria-controls="request-by-date-tab-pane" aria-selected="true">All Requests</button>
+                                          </li>
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="endpoint-frequency-tab" data-bs-toggle="tab" data-bs-target="#endpoint-frequency-tab-pane" type="button" role="tab" aria-controls="endpoint-frequency-tab-pane" aria-selected="false">Endpoint Frequency</button>
+                                          </li>
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#domain-frequency-tab-pane" type="button" role="tab" aria-controls="domain-frequency-tab-pane" aria-selected="false">Total Domain Frequency</button>
+                                          </li>
+                                          <li class="nav-item" role="presentation">
+                                              <button class="nav-link" id="daily-domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#daily-domain-frequency-tab-pane" type="button" role="tab" aria-controls="daily-domain-frequency-tab-pane" aria-selected="false">Daily Domain Frequency</button>
+                                          </li>
+                                        </ul>
+                                        <div class="tab-content" id="myTabContent">
+                                          <div class="tab-pane fade show overflow-auto active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0"></div>
+                                          <div class="tab-pane overflow-auto fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0"></div>
+                                          <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0"></div>
+                                          <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -645,6 +706,9 @@
     }
     function domainLookup(domain_id){
         return domainList.find(domain => domain.domain === domain_id);
+    }
+    function uniqueUsersPerDomainLookup(domain_id){
+        return uniqueUsersPerDomain.find(stat => stat[0] === domain_id)[1];
     }
     function formatDate(dateString) {
         const date = new Date(dateString);
