@@ -24,4 +24,5 @@ pub struct Report{
     pub request_header:String,
     pub request_protocol:String,
     pub request_scheme:String,
+    pub user_agent:String,
 }

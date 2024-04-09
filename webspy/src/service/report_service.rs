@@ -38,6 +38,7 @@ pub async fn save_request(report: &web::Json<Report>, blocked: bool, db: &web::D
         client_port: report.client_port.clone().map_or(ActiveValue::Set("".to_string()), |a|ActiveValue::Set(a)),
         client_user: report.client_user.clone().map_or(ActiveValue::Set("".to_string()), |a|ActiveValue::Set(a)),
         client_locale: report.client_locale.clone().map_or(ActiveValue::Set("".to_string()), |a|ActiveValue::Set(a)),
+        user_agent: ActiveValue::Set(report.user_agent.to_string()),
         session: report.session.clone().map_or(ActiveValue::Set("".to_string()), |a|ActiveValue::Set(a)),
         cookies: report.cookies.clone().map_or(ActiveValue::Set("".to_string()), |a|ActiveValue::Set(a)),
         request_uri: report.request_uri.clone().map_or(ActiveValue::Set("".to_string()), |a|ActiveValue::Set(a)),
