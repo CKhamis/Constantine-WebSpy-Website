@@ -326,7 +326,7 @@
                         let firstSeen = formatDate(user.first_seen);
                         let numBlocked = 0;
                         let topEndpoints = "";
-                        for(let i = 0; i < requestFrequency.length && i < 9; i++){
+                        for(let i = 0; i < requestFrequency.length && i < 7; i++){
                             topEndpoints += `<p class="mb-2"><strong>${requestFrequency[i][3]}</strong>: ${createMethodBadge(requestFrequency[i][2])} ${requestFrequency[i][1]}</p>`;
                         }
 
@@ -441,20 +441,33 @@
                         // OS and Browser icons
                         let osIcon = "N/A";
                         if(userReports.length > 0){
-                            if (userReports[0].user_agent.includes("Windows")) {
+                            if (userReports[userReports.length-1].user_agent.includes("Windows")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/Windows.svg" />`;
-                            } else if (userReports[0].user_agent.includes("mac")) {
+                            } else if (userReports[userReports.length-1].user_agent.includes("mac")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/MacOS.svg" />`;
-                            } else if (userReports[0].user_agent.includes("linux")) {
+                            } else if (userReports[userReports.length-1].user_agent.includes("linux")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/Linux.svg" />`;
-                            } else if (userReports[0].user_agent.includes("ios")) {
+                            } else if (userReports[userReports.length-1].user_agent.includes("ios")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/iOS.svg" />`;
-                            } else if (userReports[0].user_agent.includes("android")) {
+                            } else if (userReports[userReports.length-1].user_agent.includes("android")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/Android.svg" />`;
                             }
                         }
 
-                        console.log(osIcon);
+                        let browser = "N/A";
+                        if(userReports.length > 0){
+                            if (userReports[userReports.length-1].user_agent.includes("Chrome")) {
+                                browser = `<img class="browser-icon" src="/static/icons/Chrome.svg" />`;
+                            } else if (userReports[userReports.length-1].user_agent.includes("Safari")) {
+                                browser = `<img class="browser-icon" src="/static/icons/Safari.svg" />`;
+                            } else if (userReports[userReports.length-1].user_agent.includes("Firefox")) {
+                                browser = `<img class="browser-icon" src="/static/icons/Firefox.svg" />`;
+                            } else if (userReports[userReports.length-1].user_agent.includes("Edge")) {
+                                browser = `<img class="browser-icon" src="/static/icons/Edge.svg" />`;
+                            } else if (userReports[userReports.length-1].user_agent.includes("Opera")) {
+                                browser = `<img class="browser-icon" src="/static/icons/Opera.svg" />`;
+                            }
+                        }
 
                         container.innerHTML = `
                         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
@@ -493,14 +506,14 @@
                                             <p class="fs-4 text-center mb-0">${firstSeen}</p>
 
                                             <h5 class="fw-bold text-center mt-4">Browser</h5>
-                                            <p class="fs-4 text-center mb-0">${firstSeen}</p>
+                                            <p class="fs-4 text-center mb-0 mt-2">${browser}</p>
                                         </div>
                                         <div>
                                             <h5 class="fw-bold text-center">Last Seen</h5>
                                             <p class="fs-4 text-center mb-0">${lastSeen}</p>
 
                                             <h5 class="fw-bold text-center mt-4">OS</h5>
-                                            <p class="fs-4 text-center mb-0">${osIcon}</p>
+                                            <p class="fs-4 text-center mb-0 mt-2">${osIcon}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -512,7 +525,7 @@
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                        <h5 class="fw-bold text-center">Domain Activity</h5>
+                                        <h5 class="fw-bold text-center mb-2">Domain Activity</h5>
                                         <canvas id="domain-chart"></canvas>
                                     </div>
                                 </div>
@@ -616,8 +629,6 @@
                                 x: new Date(day[1]),
                                 y: day[0] === domain? day[2] : 0
                             }));
-
-                            console.log(usageData);
 
                             return {
                                 label: domain,
