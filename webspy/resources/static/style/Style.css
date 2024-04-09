@@ -66,3 +66,9 @@ ul {
     justify-content: space-around;
     align-items: center;
 }
+
+.browser-icon{
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    height: 50px;
+}

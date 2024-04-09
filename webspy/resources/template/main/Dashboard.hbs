@@ -338,6 +338,7 @@
                                         <th scope="col">Domain</th>
                                         <th scope="col">Access</th>
                                         <th scope="col">Timestamp</th>
+                                        <th scope="col">User Agent</th>
                                         <th scope="col">url</th>
                                         <th scope="col">Method</th>
                                         <th scope="col">Header</th>
@@ -353,6 +354,7 @@
                                 <th scope="row">${request.domain_id}</th>
                                 <td>${request.blocked? "<span class='badge text-bg-danger'>Denied</span>" : "<span class='badge text-bg-success'>Allow</span>"}</td>
                                 <td>${formatDateTime(request.timestamp)}</td>
+                                <td>${request.user_agent}</td>
                                 <td>${request.request_url}</td>
                                 <td>${createMethodBadge(request.request_method)}</td>
                                 <td>${request.request_header}</td>
@@ -436,6 +438,23 @@
                         });
                         userActivityTable += `</tbody></table>`;
 
+                        // OS and Browser icons
+                        let osIcon = "N/A";
+                        if(userReports.length > 0){
+                            if (userReports[0].user_agent.includes("Windows")) {
+                                osIcon = `<img class="browser-icon" src="/static/icons/Windows.svg" />`;
+                            } else if (userReports[0].user_agent.includes("mac")) {
+                                osIcon = `<img class="browser-icon" src="/static/icons/MacOS.svg" />`;
+                            } else if (userReports[0].user_agent.includes("linux")) {
+                                osIcon = `<img class="browser-icon" src="/static/icons/Linux.svg" />`;
+                            } else if (userReports[0].user_agent.includes("ios")) {
+                                osIcon = `<img class="browser-icon" src="/static/icons/iOS.svg" />`;
+                            } else if (userReports[0].user_agent.includes("android")) {
+                                osIcon = `<img class="browser-icon" src="/static/icons/Android.svg" />`;
+                            }
+                        }
+
+                        console.log(osIcon);
 
                         container.innerHTML = `
                         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
@@ -472,10 +491,16 @@
                                         <div>
                                             <h5 class="fw-bold text-center">First Seen</h5>
                                             <p class="fs-4 text-center mb-0">${firstSeen}</p>
+
+                                            <h5 class="fw-bold text-center mt-4">Browser</h5>
+                                            <p class="fs-4 text-center mb-0">${firstSeen}</p>
                                         </div>
                                         <div>
                                             <h5 class="fw-bold text-center">Last Seen</h5>
                                             <p class="fs-4 text-center mb-0">${lastSeen}</p>
+
+                                            <h5 class="fw-bold text-center mt-4">OS</h5>
+                                            <p class="fs-4 text-center mb-0">${osIcon}</p>
                                         </div>
                                     </div>
                                 </div>
