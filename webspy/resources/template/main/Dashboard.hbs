@@ -125,24 +125,6 @@
                         }
                     });
 
-                    console.log(dailyDomainFrequencyDatasets);
-
-                    // for each domain, loop through the data and add that to dataset
-//                     domainList.forEach((domain) => {
-//                         let domainData = [];
-//                         domains.push(domain.domain);
-//                         domainActivity.forEach((day) => {
-//                             if(day[1] === domain.domain){
-//                                 domainData.push({
-//                                     x: new Date(day[0]),
-//                                     y: day[2]
-//                                 });
-//                             console.log("Added: " + new Date(day[0]) + ", " + day[2]);
-//                             }
-//                         });
-//                         activityDatasets.push({data: domainData, label: domain.domain});
-//                     });
-
                     let domainActivityCanvas = document.querySelector("#domain-activity-canvas");
                     let activityChart = new Chart(domainActivityCanvas, {
                         type:'line',
@@ -150,12 +132,17 @@
                             datasets: dailyDomainFrequencyDatasets
                         },
                         options: {
+                            aspectRatio: 4,
                             scales: {
                                 x: {
                                     type: 'time',
                                     time:{
                                         unit: 'day',
                                     }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    stepSize: 1
                                 }
                             }
                         }
@@ -742,6 +729,10 @@
                                         time:{
                                             unit: 'day',
                                         }
+                                    },
+                                    y: {
+                                        beginAtZero: true,
+                                        stepSize: 1
                                     }
                                 }
                             }
