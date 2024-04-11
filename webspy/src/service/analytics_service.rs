@@ -18,20 +18,17 @@ pub async fn unique_users_per_domain(db: &web::Data<AppState>) -> Vec<(String, i
             ORDER BY unique_visitors;"
     )).await.unwrap();
 
-
-    // NOTE: there is an issue with this function involving the timezone of MySQL and WebSpy.
-    // This can lead to differences in direct queries and WebSpy queries
     query_result_list.iter().filter_map(|query_result| {
         query_result.try_get_many_by_index().ok()
     }).collect()
 }
 
-pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, i32)> {
+pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, String, i32)> {
     let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,
-        "SELECT CAST(DATE(timestamp) AS datetime) AS date, COUNT(*) AS total_requests
+        "SELECT CAST(DATE(timestamp) AS datetime) AS date, domain_id, COUNT(*) AS total_requests
             FROM web_spy.request
-            GROUP BY CAST(DATE(timestamp) AS datetime)
+            GROUP BY CAST(DATE(timestamp) AS datetime), domain_id
             ORDER BY CAST(DATE(timestamp) AS datetime) DESC;"
     )).await.unwrap();
 

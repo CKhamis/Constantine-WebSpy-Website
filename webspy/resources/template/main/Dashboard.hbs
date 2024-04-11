@@ -19,7 +19,7 @@
 
     function init(){
         refresh();
-        renderHomeOverview()
+        //renderHomeOverview()
     }
 
     function refresh(){
@@ -75,14 +75,87 @@
     }
 
     function renderHomeOverview(){
-        let container = document.querySelector("#main-content");
-        let htmlContent = `
-        <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
-            <h2 class="fw-bold fs-1">Traffic Overview</h2>
-        </div>
-        `;
+        const allDomainActivityFetch = fetch("/api/analytics/daily-requests");
 
-        container.innerHTML = htmlContent;
+        Promise.all([allDomainActivityFetch])
+                .then(responses => {
+                    const response1 = checkStatus(responses[0]);
+
+                    return Promise.all([response1]);
+                })
+                .then(data => {
+                    let response1 = data[0].json();
+
+                    return Promise.all([response1]);
+                })
+                .then(data => {
+                    let domainActivity = data[0];
+
+                    let container = document.querySelector("#main-content");
+                    container.innerHTML = `
+                    <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
+                        <h2 class="fw-bold fs-1">Traffic Overview</h2>
+                    </div>
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                    <h5 class="fw-bold text-center">All Domain Activity</h5>
+                                    <canvas id="domain-activity-canvas"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+
+                    let activityDatasets = [];
+                    let domains = [];
+                    // for each domain, loop through the data and add that to dataset
+                    domainList.forEach((domain) => {
+                        let domainData = [];
+                        domains.push(domain.domain);
+                        domainActivity.forEach((day) => {
+                            if(day[1] === domain.domain){
+                                domainData.push({
+                                    x: new Date(day[0]),
+                                    y: day[2]
+                                });
+                            }
+                        });
+                        activityDatasets.push({data: domainData, label: domain.domain});
+                    });
+
+                    console.log(activityDatasets);
+                    console.log(domains);
+                    let domainActivityCanvas = document.querySelector("#domain-activity-canvas");
+                    let activityChart = new Chart(domainActivityCanvas, {
+                        type:'line',
+                        data:{
+                            labels: domains,
+                            datasets: activityDatasets
+                        },
+                        options: {
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time:{
+                                        unit: 'day',
+                                    }
+                                }
+                            }
+                        }
+                    });
+                })
+                .catch((response)=>{
+                    console.log(response);
+                    response.json()
+                            .then(errorData => {
+                                console.log(errorData);
+                            })
+                            .catch(error => {
+                                console.error("Error parsing error response:", error);
+                            });
+                });
     }
 
     function viewDomain(domainId){
@@ -186,8 +259,6 @@
                             </div>
                         </div>
                         `;
-
-
 
                         let activityCanvas = document.querySelector("#domain-activity-canvas");
                         let activityChart = new Chart(activityCanvas, {
@@ -506,14 +577,14 @@
                                             <p class="fs-4 text-center mb-0">${firstSeen}</p>
 
                                             <h5 class="fw-bold text-center mt-4">Browser</h5>
-                                            <p class="fs-4 text-center mb-0 mt-2">${browser}</p>
+                                            <p class="fs-4 text-center mb-0 mt-3">${browser}</p>
                                         </div>
                                         <div>
                                             <h5 class="fw-bold text-center">Last Seen</h5>
                                             <p class="fs-4 text-center mb-0">${lastSeen}</p>
 
                                             <h5 class="fw-bold text-center mt-4">OS</h5>
-                                            <p class="fs-4 text-center mb-0 mt-2">${osIcon}</p>
+                                            <p class="fs-4 text-center mb-0 mt-3">${osIcon}</p>
                                         </div>
                                     </div>
                                 </div>
