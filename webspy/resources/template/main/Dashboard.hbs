@@ -109,30 +109,45 @@
                     `;
 
                     let activityDatasets = [];
-                    let domains = [];
-                    // for each domain, loop through the data and add that to dataset
-                    domainList.forEach((domain) => {
-                        let domainData = [];
-                        domains.push(domain.domain);
-                        domainActivity.forEach((day) => {
-                            if(day[1] === domain.domain){
-                                domainData.push({
-                                    x: new Date(day[0]),
-                                    y: day[2]
-                                });
-                            }
-                        });
-                        activityDatasets.push({data: domainData, label: domain.domain});
+                    let domains = domainList.map(domain => domain.domain);
+
+                    let dailyDomainFrequencyDatasets = domains.map(domain => {
+                        let usageData = domainActivity
+                          .filter(day => domain === day[1])
+                          .map(day => ({
+                            x: new Date(day[0]),
+                            y: day[2]
+                          }));
+                        console.log("domain:" + domain + " data: " + usageData);
+                        return {
+                            label: domain,
+                            data: usageData
+                        }
                     });
 
-                    console.log(activityDatasets);
-                    console.log(domains);
+                    console.log(dailyDomainFrequencyDatasets);
+
+                    // for each domain, loop through the data and add that to dataset
+//                     domainList.forEach((domain) => {
+//                         let domainData = [];
+//                         domains.push(domain.domain);
+//                         domainActivity.forEach((day) => {
+//                             if(day[1] === domain.domain){
+//                                 domainData.push({
+//                                     x: new Date(day[0]),
+//                                     y: day[2]
+//                                 });
+//                             console.log("Added: " + new Date(day[0]) + ", " + day[2]);
+//                             }
+//                         });
+//                         activityDatasets.push({data: domainData, label: domain.domain});
+//                     });
+
                     let domainActivityCanvas = document.querySelector("#domain-activity-canvas");
                     let activityChart = new Chart(domainActivityCanvas, {
                         type:'line',
                         data:{
-                            labels: domains,
-                            datasets: activityDatasets
+                            datasets: dailyDomainFrequencyDatasets
                         },
                         options: {
                             scales: {
@@ -696,9 +711,11 @@
                         });
 
                         let dailyDomainFrequencyDatasets = domainList.map(domain => {
-                            let usageData = dailyDomainFrequency.map(day => ({
+                            let usageData = dailyDomainFrequency
+                                .filter(day => day[0] === domain)
+                                .map(day => ({
                                 x: new Date(day[1]),
-                                y: day[0] === domain? day[2] : 0
+                                y: day[2]
                             }));
 
                             return {
