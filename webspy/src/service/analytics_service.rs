@@ -53,6 +53,21 @@ pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, Str
     }).collect()
 }
 
+pub async fn daily_blocked_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, i32)> {
+    let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
+        DatabaseBackend::MySql,
+        "
+            SELECT CAST(DATE(timestamp) AS datetime) AS date, COUNT(*) as count
+            FROM request
+            WHERE blocked = true
+            GROUP BY date;"
+    )).await.unwrap();
+
+    query_result_list.iter().filter_map(|query_result| {
+        query_result.try_get_many_by_index().ok()
+    }).collect()
+}
+
 pub async fn domain_activity(db: &web::Data<AppState>) -> Vec<(String, i64)> {
     let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,

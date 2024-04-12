@@ -13,7 +13,7 @@
     Chart.defaults.plugins.legend.labels.color = 'white';
     Chart.defaults.plugins.title.display = false;
 
-    let domainList, userList, uniqueUsersPerDomain, requestsList, endpointRequestFrequency, requestTotal;
+    let domainList, userList, uniqueUsersPerDomain, requestsList, endpointRequestFrequency, requestTotal, blockedRequestsDailyCount;
 
     init();
 
@@ -29,8 +29,9 @@
         const uniqueUsersPerDomainFetch = fetch("/api/analytics/unique-users-all-domains");
         const endpointRequestFrequencyFetch = fetch("/api/analytics/endpoint-requests");
         const requestTotalFetch = fetch("/api/analytics/request-total");
+        const dailyBlockedFetch = fetch("/api/analytics/daily-blocked-requests");
 
-        Promise.all([contentFetch, userFetch, uniqueUsersPerDomainFetch, requestFetch, endpointRequestFrequencyFetch, requestTotalFetch])
+        Promise.all([contentFetch, userFetch, uniqueUsersPerDomainFetch, requestFetch, endpointRequestFrequencyFetch, requestTotalFetch, dailyBlockedFetch])
                 .then(responses => {
                     const response1 = checkStatus(responses[0]);
                     const response2 = checkStatus(responses[1]);
@@ -38,8 +39,9 @@
                     const response4 = checkStatus(responses[3]);
                     const response5 = checkStatus(responses[4]);
                     const response6 = checkStatus(responses[5]);
+                    const response7 = checkStatus(responses[6]);
 
-                    return Promise.all([response1, response2, response3, response4, response5, response6]);
+                    return Promise.all([response1, response2, response3, response4, response5, response6, response7]);
                 })
                 .then(data => {
                     let response1 = data[0].json();
@@ -48,8 +50,9 @@
                     let response4 = data[3].json();
                     let response5 = data[4].json();
                     let response6 = data[5].json();
+                    let response7 = data[6].json();
 
-                    return Promise.all([response1, response2, response3, response4, response5, response6]);
+                    return Promise.all([response1, response2, response3, response4, response5, response6, response7]);
                 })
                 .then(data => {
                     domainList = data[0];
@@ -58,6 +61,7 @@
                     requestsList = data[3];
                     endpointRequestFrequency = data[4];
                     requestTotal = data[5];
+                    blockedRequestsDailyCount = data[6];
                     populateNavBar();
                 })
                 .catch((response)=>{
@@ -144,6 +148,18 @@
                                     <p class="fs-4 text-center">${domainList.length}</p>
                                 </div>
                             </div>
+                            <div class="col-12 col-lg-4 mb-3">
+                                <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                    <h5 class="fw-bold text-center">Most Used Endpoints</h5>
+                                    sadf
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-8 mb-3">
+                                <div class="px-3 py-3 rounded-3 bg-dark h-100">
+                                    <h5 class="fw-bold text-center">Blocked Requests</h5>
+                                    <canvas id="blocked-requests-canvas"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     `;
@@ -207,6 +223,36 @@
                             }]
                         },
                         options:{}
+                    });
+
+                    let blockedDatasetCoordinates = [];
+                    blockedRequestsDailyCount.forEach((request) => {
+                        blockedDatasetCoordinates.push({x: new Date(request[0]), y: request[1]});
+                    });
+
+                    let blockedDataset = [{label: "rat", data: blockedDatasetCoordinates}];
+
+                    let blockedRequestsCanvas = document.querySelector("#blocked-requests-canvas");
+                    let blockedRequestChart = new Chart(blockedRequestsCanvas, {
+                        type:'line',
+                        data:{
+                            datasets: blockedDataset
+                        },
+                        options: {
+                            aspectRatio: 2,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time:{
+                                        unit: 'day',
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true,
+                                    stepSize: 1
+                                }
+                            }
+                        }
                     });
                 })
                 .catch((response)=>{
