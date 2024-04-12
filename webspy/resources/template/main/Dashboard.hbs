@@ -113,6 +113,13 @@
                         requestFrequency += `<p class="mb-2" onclick="viewDomain('${endpointRequestFrequency[i][0]}')"><strong>${endpointRequestFrequency[i][3]}</strong>: ${createMethodBadge(endpointRequestFrequency[i][2])} ${endpointRequestFrequency[i][1]}</p>`;
                     }
 
+                    let blockedDatasetCoordinates = [];
+                    let totalBlockedRequests = 0;
+                    blockedRequestsDailyCount.forEach((request) => {
+                        blockedDatasetCoordinates.push({x: new Date(request[0]), y: request[1]});
+                        totalBlockedRequests += request[1];
+                    });
+
                     let container = document.querySelector("#main-content");
                     container.innerHTML = `
                     <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
@@ -150,8 +157,10 @@
                             </div>
                             <div class="col-12 col-lg-4 mb-3">
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                    <h5 class="fw-bold text-center">Most Used Endpoints</h5>
-                                    sadf
+                                    <h5 class="fw-bold text-center">Blocked Users</h5>
+                                    <p class="fs-4 text-center">4</p>
+                                    <h5 class="fw-bold text-center">Blocked Requests</h5>
+                                    <p class="fs-4 text-center">${totalBlockedRequests}</p>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-8 mb-3">
@@ -223,11 +232,6 @@
                             }]
                         },
                         options:{}
-                    });
-
-                    let blockedDatasetCoordinates = [];
-                    blockedRequestsDailyCount.forEach((request) => {
-                        blockedDatasetCoordinates.push({x: new Date(request[0]), y: request[1]});
                     });
 
                     let blockedDataset = [{label: "rat", data: blockedDatasetCoordinates}];
