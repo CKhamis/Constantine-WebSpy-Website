@@ -23,6 +23,19 @@ pub async fn unique_users_per_domain(db: &web::Data<AppState>) -> Vec<(String, i
     }).collect()
 }
 
+pub async fn request_total(db: &web::Data<AppState>) -> Vec<(i64)> {
+    let query_result: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
+        DatabaseBackend::MySql,
+        "
+            SELECT count(*) AS count FROM request;
+            "
+    )).await.unwrap();
+
+    query_result.iter().filter_map(|query_result| {
+        query_result.try_get_many_by_index().ok()
+    }).collect()
+}
+
 pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, String, i32)> {
     let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,

@@ -1,6 +1,6 @@
 use actix_web::{get, HttpResponse, Responder, web};
 use actix_web::http::header::ContentType;
-use crate::service::analytics_service::{daily_activity, daily_activity_by_user, daily_activity_by_user_by_domain, domain_activity, domain_activity_by_user, endpoint_frequency, endpoint_frequency_by_user, unique_users_per_domain};
+use crate::service::analytics_service::{daily_activity, daily_activity_by_user, daily_activity_by_user_by_domain, domain_activity, domain_activity_by_user, endpoint_frequency, endpoint_frequency_by_user, request_total, unique_users_per_domain};
 use crate::service::AppState;
 
 #[get("/api/analytics/daily-requests")]
@@ -23,6 +23,14 @@ pub async fn domain_requests(db: web::Data<AppState>) -> impl Responder{
 #[get("/api/analytics/endpoint-requests")]
 pub async fn get_endpoint_frequency(db: web::Data<AppState>) -> impl Responder{
     match serde_json::to_string(&endpoint_frequency(&db).await){
+        Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
+        Err(_) => {HttpResponse::BadRequest().body("data could not be fetched")}
+    }
+}
+
+#[get("/api/analytics/request-total")]
+pub async fn get_endpoint_frequency_total(db: web::Data<AppState>) -> impl Responder{
+    match serde_json::to_string(&request_total(&db).await){
         Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
         Err(_) => {HttpResponse::BadRequest().body("data could not be fetched")}
     }

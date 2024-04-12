@@ -13,7 +13,7 @@
     Chart.defaults.plugins.legend.labels.color = 'white';
     Chart.defaults.plugins.title.display = false;
 
-    let domainList, userList, uniqueUsersPerDomain;
+    let domainList, userList, uniqueUsersPerDomain, requestsList, endpointRequestFrequency, requestTotal;
 
     init();
 
@@ -25,27 +25,39 @@
     function refresh(){
         const contentFetch = fetch("/api/domain/all");
         const userFetch = fetch("/api/user/all");
+        const requestFetch = fetch("/api/analytics/domain-requests");
         const uniqueUsersPerDomainFetch = fetch("/api/analytics/unique-users-all-domains");
+        const endpointRequestFrequencyFetch = fetch("/api/analytics/endpoint-requests");
+        const requestTotalFetch = fetch("/api/analytics/request-total");
 
-        Promise.all([contentFetch, userFetch, uniqueUsersPerDomainFetch])
+        Promise.all([contentFetch, userFetch, uniqueUsersPerDomainFetch, requestFetch, endpointRequestFrequencyFetch, requestTotalFetch])
                 .then(responses => {
                     const response1 = checkStatus(responses[0]);
                     const response2 = checkStatus(responses[1]);
                     const response3 = checkStatus(responses[2]);
+                    const response4 = checkStatus(responses[3]);
+                    const response5 = checkStatus(responses[4]);
+                    const response6 = checkStatus(responses[5]);
 
-                    return Promise.all([response1, response2, response3]);
+                    return Promise.all([response1, response2, response3, response4, response5, response6]);
                 })
                 .then(data => {
                     let response1 = data[0].json();
                     let response2 = data[1].json();
                     let response3 = data[2].json();
+                    let response4 = data[3].json();
+                    let response5 = data[4].json();
+                    let response6 = data[5].json();
 
-                    return Promise.all([response1, response2, response3]);
+                    return Promise.all([response1, response2, response3, response4, response5, response6]);
                 })
                 .then(data => {
                     domainList = data[0];
                     userList = data[1];
                     uniqueUsersPerDomain = data[2];
+                    requestsList = data[3];
+                    endpointRequestFrequency = data[4];
+                    requestTotal = data[5];
                     populateNavBar();
                 })
                 .catch((response)=>{
@@ -91,6 +103,12 @@
                 .then(data => {
                     let domainActivity = data[0];
 
+                    let requestFrequency = "";
+
+                    for(let i = 0; i < endpointRequestFrequency.length && i < 7; i++){
+                        requestFrequency += `<p class="mb-2" onclick="viewDomain('${endpointRequestFrequency[i][0]}')"><strong>${endpointRequestFrequency[i][3]}</strong>: ${createMethodBadge(endpointRequestFrequency[i][2])} ${endpointRequestFrequency[i][1]}</p>`;
+                    }
+
                     let container = document.querySelector("#main-content");
                     container.innerHTML = `
                     <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
@@ -107,19 +125,23 @@
                             <div class="col-12 col-lg-4 mb-3">
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
                                     <h5 class="fw-bold text-center">Request Distribution</h5>
-                                    <canvas id="request-distribution-canvas"></canvas>
+                                    <canvas id="request-per-domain-canvas"></canvas>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 mb-3">
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
                                     <h5 class="fw-bold text-center">Most Used Endpoints</h5>
-
+                                    ${requestFrequency}
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 mb-3">
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                    <h5 class="fw-bold text-center">Unique Users:</h5>
-
+                                    <h5 class="fw-bold text-center">Total Requests</h5>
+                                    <p class="fs-4 text-center">${requestTotal}</p>
+                                    <h5 class="fw-bold text-center">Unique Users</h5>
+                                    <p class="fs-4 text-center">${userList.length}</p>
+                                    <h5 class="fw-bold text-center">Bugged Domains</h5>
+                                    <p class="fs-4 text-center">${domainList.length}</p>
                                 </div>
                             </div>
                         </div>
@@ -164,6 +186,27 @@
                                 }
                             }
                         }
+                    });
+
+                    let rdcDomains = [];
+                    let domainRequestCount = [];
+
+                    requestsList.forEach((domain) => {
+                        rdcDomains.push(domain[0]);
+                        domainRequestCount.push(domain[1]);
+                    });
+
+                    let requestDistributionCanvas = document.querySelector("#request-per-domain-canvas");
+                    let domainChart = new Chart(requestDistributionCanvas, {
+                        type:'doughnut',
+                        data:{
+                            labels:rdcDomains,
+                            datasets:[{
+                                label:'Requests',
+                                data:domainRequestCount
+                            }]
+                        },
+                        options:{}
                     });
                 })
                 .catch((response)=>{
@@ -732,8 +775,6 @@
 
                         let activityCanvas = document.querySelector("#activity-chart");
                         let domainCanvas = document.querySelector("#domain-chart");
-
-
 
                         let activityChart = new Chart(activityCanvas, {
                             type:'line',
