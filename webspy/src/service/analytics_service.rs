@@ -60,7 +60,8 @@ pub async fn daily_blocked_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLo
             SELECT CAST(DATE(timestamp) AS datetime) AS date, COUNT(*) as count
             FROM request
             WHERE blocked = true
-            GROUP BY date;"
+            GROUP BY date
+            ORDER BY date ASC;"
     )).await.unwrap();
 
     query_result_list.iter().filter_map(|query_result| {

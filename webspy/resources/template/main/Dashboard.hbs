@@ -235,7 +235,6 @@
                     });
 
                     let blockedDataset = [{label: "rat", data: blockedDatasetCoordinates}];
-
                     let blockedRequestsCanvas = document.querySelector("#blocked-requests-canvas");
                     let blockedRequestChart = new Chart(blockedRequestsCanvas, {
                         type:'line',
@@ -244,6 +243,11 @@
                         },
                         options: {
                             aspectRatio: 2,
+                            plugins: {
+                                legend: {
+                                    display: false // Hide the legend
+                                }
+                            },
                             scales: {
                                 x: {
                                     type: 'time',
