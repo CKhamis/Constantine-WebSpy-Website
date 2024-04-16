@@ -110,7 +110,7 @@
                     let requestFrequency = "";
 
                     for(let i = 0; i < endpointRequestFrequency.length && i < 7; i++){
-                        requestFrequency += `<p class="mb-2" onclick="viewDomain('${endpointRequestFrequency[i][0]}')"><strong>${endpointRequestFrequency[i][3]}</strong>: ${createMethodBadge(endpointRequestFrequency[i][2])} ${endpointRequestFrequency[i][1]}</p>`;
+                        requestFrequency += `<p class="mb-2" role="button" onclick="viewDomain('${endpointRequestFrequency[i][0]}')"><strong>${endpointRequestFrequency[i][3]}</strong>: ${createMethodBadge(endpointRequestFrequency[i][2])} ${endpointRequestFrequency[i][0] + endpointRequestFrequency[i][1]}</p>`;
                     }
 
                     let blockedDatasetCoordinates = [];
@@ -151,7 +151,7 @@
                                     <p class="fs-4 text-center">${requestTotal}</p>
                                     <h5 class="fw-bold text-center">Unique Users</h5>
                                     <p class="fs-4 text-center">${userList.length}</p>
-                                    <h5 class="fw-bold text-center">Bugged Domains</h5>
+                                    <h5 class="fw-bold text-center">Reporting Domains</h5>
                                     <p class="fs-4 text-center">${domainList.length}</p>
                                 </div>
                             </div>
@@ -167,6 +167,30 @@
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
                                     <h5 class="fw-bold text-center">Blocked Requests</h5>
                                     <canvas id="blocked-requests-canvas"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <div class="py-3">
+                                    <ul class="nav nav-underline" id="myTab" role="tablist">
+                                      <li class="nav-item" role="presentation">
+                                        <button class="nav-link active" id="request-by-date-tab" data-bs-toggle="tab" data-bs-target="#request-by-date-tab-pane" type="button" role="tab" aria-controls="request-by-date-tab-pane" aria-selected="true">All Requests</button>
+                                      </li>
+                                      <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="endpoint-frequency-tab" data-bs-toggle="tab" data-bs-target="#endpoint-frequency-tab-pane" type="button" role="tab" aria-controls="endpoint-frequency-tab-pane" aria-selected="false">Endpoint Frequency</button>
+                                      </li>
+                                      <li class="nav-item" role="presentation">
+                                        <button class="nav-link" id="domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#domain-frequency-tab-pane" type="button" role="tab" aria-controls="domain-frequency-tab-pane" aria-selected="false">Total Domain Frequency</button>
+                                      </li>
+                                      <li class="nav-item" role="presentation">
+                                          <button class="nav-link" id="daily-domain-frequency-tab" data-bs-toggle="tab" data-bs-target="#daily-domain-frequency-tab-pane" type="button" role="tab" aria-controls="daily-domain-frequency-tab-pane" aria-selected="false">Daily Domain Frequency</button>
+                                      </li>
+                                    </ul>
+                                    <div class="tab-content" id="myTabContent">
+                                      <div class="tab-pane fade show overflow-auto active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0"></div>
+                                      <div class="tab-pane overflow-auto fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0"></div>
+                                      <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0"></div>
+                                      <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
