@@ -5,8 +5,8 @@ use crate::data_transfer_object::ban_response::BanResponse;
 use crate::data_transfer_object::new_user::NewUser;
 use crate::data_transfer_object::report::Report;
 use crate::service::AppState;
-use crate::service::user_service::{active_users, new_user, user_check};
-use crate::service::report_service::{find_by_domain, find_by_user, save_request, verify_domain};
+use crate::service::user_service::{active_users, all_users, new_user, user_check};
+use crate::service::report_service::{all_reports, find_by_domain, find_by_user, save_request, verify_domain};
 
 #[post("/report")]
 pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppState>) -> impl Responder {
@@ -124,6 +124,15 @@ pub async fn report_request(report: web::Json<Report>, app_state: web::Data<AppS
                 HttpResponse::Ok().insert_header(ContentType::json()).body(ser_response)
             }
         }
+    }
+}
+
+#[get("/api/report/all")]
+pub async fn get_all_reports(db: web::Data<AppState>) -> impl Responder{
+    let all_users = all_reports(&db.conn).await;
+    match serde_json::to_string(&all_users){
+        Ok(response) => {HttpResponse::Ok().insert_header(ContentType::json()).body(response)}
+        Err(_) => {HttpResponse::BadRequest().body("There was an error serializing user list")}
     }
 }
 

@@ -1,5 +1,5 @@
 use actix_web::web;
-use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder};
+use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 use sqlx::types::chrono::Local;
 use uuid::Uuid;
 use crate::data_transfer_object::report::Report;
@@ -7,9 +7,8 @@ use crate::model::{domain, request};
 use crate::model::request::{Model};
 use crate::service::AppState;
 
-pub async fn find_all(conn: &DatabaseConnection){
-    let logs: Vec<Model> = request::Entity::find().all(conn).await.unwrap();
-    println!("{:?}", logs);
+pub async fn all_reports(conn: &DatabaseConnection) -> Vec<Model>{
+    request::Entity::find().limit(500).all(conn).await.unwrap()
 }
 
 pub async fn verify_domain(url: &String, conn: &DatabaseConnection) -> bool{

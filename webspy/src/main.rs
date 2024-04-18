@@ -12,6 +12,7 @@ use webspy::controller::user_controller::*;
 use webspy::HANDLEBARS_TEMPLATE;
 use webspy::model::{user, domain, request};
 use webspy::service::analytics_service::unique_users_per_domain;
+use webspy::controller::report_controller::*;
 use webspy::util::template_config::template_resources;
 
 #[actix_web::main]
@@ -79,6 +80,7 @@ async fn main() -> std::io::Result<()> {
             .service(unique_visitors)
             .service(get_endpoint_frequency_total)
             .service(daily_blocked_requests)
+            .service(get_all_reports)
             // .service(new_ban)
             // .service(all_bans)
             .service(actix_files::Files::new("/static", "./webspy/resources/static"))

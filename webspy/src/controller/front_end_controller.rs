@@ -3,7 +3,6 @@ use handlebars::{Handlebars, RenderError};
 use serde_json::json;
 use crate::HANDLEBARS_TEMPLATE;
 use crate::service::AppState;
-use crate::service::report_service::find_all;
 use crate::util::template_config::template_validity;
 
 #[get("/")]
