@@ -145,7 +145,7 @@
                     allRequests.forEach((request) => {
                         reportTable += `
                             <tr>
-                                <th scope="row">${request.domain_id}</th>
+                                <th scope="row" onclick="viewDomain('${request.domain_id}')" role="button">${request.domain_id}</th>
                                 <td>${request.blocked? "<span class='badge text-bg-danger'>Denied</span>" : "<span class='badge text-bg-success'>Allow</span>"}</td>
                                 <td>${formatDateTime(request.timestamp)}</td>
                                 <td>${request.user_agent}</td>
@@ -176,7 +176,7 @@
                     endpointRequestFrequency.forEach((request) => {
                         endpointTable += `
                             <tr>
-                                <th scope="row">${request[0]}</th>
+                                <th scope="row" onclick="viewDomain('${request[0]}')" role="button">${request[0]}</th>
                                 <td>${request[1]}</th>
                                 <td>${createMethodBadge(request[2])}</td>
                                 <td>${request[3]}</td>
@@ -184,6 +184,50 @@
                             `;
                     });
                     endpointTable += `</tbody></table>`;
+
+                    // Domain frequency table
+                    let domainTable = `
+                            <table class="table table-dark table-striped table-responsive">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Domain</th>
+                                        <th scope="col">Frequency</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                    requestsList.forEach((request) => {
+                        domainTable += `
+                            <tr>
+                                <th scope="row" onclick="viewDomain('${request[0]}')" role="button">${request[0]}</th>
+                                <td>${request[1]}</td>
+                            </tr>
+                            `;
+                    });
+                    domainTable += `</tbody></table>`;
+
+                    // User activity table
+                    let userActivityTable = `
+                            <table class="table table-dark table-striped table-responsive">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Domain</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Requests</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                        `;
+                    domainActivity.forEach((request) => {
+                        userActivityTable += `
+                            <tr>
+                                <th scope="row" onclick="viewDomain('${request[1]}')" role="button">${request[1]}</th>
+                                <td>${formatDateTime(request[0])}</th>
+                                <td>${request[2]}</td>
+                            </tr>
+                            `;
+                    });
+                    userActivityTable += `</tbody></table>`;
 
                     let container = document.querySelector("#main-content");
                     container.innerHTML = `
@@ -253,8 +297,8 @@
                                     <div class="tab-content" id="myTabContent">
                                       <div class="tab-pane fade show overflow-auto active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0">${reportTable}</div>
                                       <div class="tab-pane overflow-auto fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0">${endpointTable}</div>
-                                      <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0"></div>
-                                      <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0"></div>
+                                      <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
+                                      <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${userActivityTable}</div>
                                     </div>
                                 </div>
                             </div>
@@ -698,7 +742,7 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col">Domain</th>
-                                        <th scope="col">Timestamp</th>
+                                        <th scope="col">Date</th>
                                         <th scope="col">Requests</th>
                                     </tr>
                                 </thead>
