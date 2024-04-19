@@ -1,15 +1,13 @@
-use crate::util::threat_level::DangerLevel;
 use sea_orm::prelude::DateTimeLocal;
 use sea_orm::DerivePrimaryKey;
-use sea_orm::{
-    ActiveModelBehavior, DeriveEntityModel, DeriveRelation, EntityTrait, EnumIter, Related,
-    RelationDef, RelationTrait,
-};
+use sea_orm::{ActiveModelBehavior, EntityTrait, EnumIter, Related, RelationDef, RelationTrait};
 use sea_orm::{
     ColumnDef, ColumnTrait, ColumnType, ColumnTypeTrait, DeriveActiveModel, DeriveColumn,
     DeriveEntity, DeriveModel, EntityName, PrimaryKeyTrait,
 };
 use serde::{Deserialize, Serialize};
+
+use crate::util::threat_level::DangerLevel;
 
 #[derive(Copy, Clone, Default, Debug, DeriveEntity)]
 pub struct Entity; // add the entity struct, since we don't plan on generating this with proc macros

@@ -1,14 +1,15 @@
+use actix_web::http::header::ContentType;
+use actix_web::{get, post, web, HttpResponse, Responder};
+use sqlx::types::chrono::Local;
+
 use crate::data_transfer_object::ban_response::BanResponse;
 use crate::data_transfer_object::new_user::NewUser;
 use crate::data_transfer_object::report::Report;
 use crate::service::report_service::{
     all_reports, find_by_domain, find_by_user, save_request, verify_domain,
 };
-use crate::service::user_service::{active_users, all_users, new_user, user_check};
+use crate::service::user_service::{new_user, user_check};
 use crate::service::AppState;
-use actix_web::http::header::ContentType;
-use actix_web::{get, post, web, HttpResponse, Responder};
-use sqlx::types::chrono::Local;
 
 #[post("/report")]
 pub async fn report_request(
@@ -65,8 +66,7 @@ pub async fn report_request(
                 }
                 Err(e) => {
                     dbg!(&e);
-                    return HttpResponse::BadRequest()
-                        .body(format!("OOOOOPS! There was an error :( {}", e.to_string()));
+                    HttpResponse::BadRequest().body(format!("OOOOOPS! There was an error :( {}", e))
                 }
             }
         }
@@ -83,7 +83,7 @@ pub async fn report_request(
 
                     // Save request
                     match save_request(&report, true, &app_state).await {
-                        Ok(a) => {
+                        Ok(_) => {
                             //println!("{:?}", a);
                         }
                         Err(a) => {
@@ -108,7 +108,7 @@ pub async fn report_request(
 
                     // save request
                     match save_request(&report, false, &app_state).await {
-                        Ok(a) => {
+                        Ok(_) => {
                             //println!("{:?}", a);
                         }
                         Err(a) => {
@@ -130,7 +130,7 @@ pub async fn report_request(
                 };
 
                 match save_request(&report, false, &app_state).await {
-                    Ok(a) => {
+                    Ok(_) => {
                         //println!("{:?}", a);
                     }
                     Err(a) => {

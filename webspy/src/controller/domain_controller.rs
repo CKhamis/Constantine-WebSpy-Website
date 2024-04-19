@@ -1,12 +1,11 @@
+use actix_web::http::header::ContentType;
+use actix_web::{get, post, web, HttpResponse, Responder};
+use serde_json::json;
+
 use crate::data_transfer_object::new_domain::NewDomain;
 use crate::data_transfer_object::status_message::StatusMessage;
 use crate::service::domain_service::{get_domains, save_domain};
 use crate::service::AppState;
-use actix_web::error::UrlencodedError::Serialize;
-use actix_web::http::header::ContentType;
-use actix_web::{get, post, web, HttpResponse, Responder};
-use sea_orm::ColumnType::Json;
-use serde_json::json;
 
 #[post("/api/domain/new")]
 pub async fn new_domain(

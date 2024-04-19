@@ -1,3 +1,5 @@
+#![allow(unused_variables)] // TODO(costi): remove this once ready
+
 use handlebars::Handlebars;
 use lazy_static::lazy_static;
 use std::sync::RwLock;

@@ -1,18 +1,14 @@
-use crate::model::request;
-use crate::model::request::Model;
-use crate::service::AppState;
-use actix_web::web;
-use chrono::NaiveDate;
-use sea_orm::prelude::DateTimeLocal;
-use sea_orm::{
-    ConnectionTrait, DatabaseBackend, DatabaseConnection, EntityOrSelect, EntityTrait, QueryResult,
-    QuerySelect, Statement,
-};
 use std::net::{IpAddr, Ipv6Addr};
 use std::str::FromStr;
 
+use actix_web::web;
+use sea_orm::prelude::DateTimeLocal;
+use sea_orm::{ConnectionTrait, DatabaseBackend, QueryResult, Statement};
+
+use crate::service::AppState;
+
 pub async fn unique_users_per_domain(db: &web::Data<AppState>) -> Vec<(String, i64)> {
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -31,8 +27,8 @@ pub async fn unique_users_per_domain(db: &web::Data<AppState>) -> Vec<(String, i
         .collect()
 }
 
-pub async fn request_total(db: &web::Data<AppState>) -> Vec<(i64)> {
-    let query_result: Vec<(QueryResult)> = db
+pub async fn request_total(db: &web::Data<AppState>) -> Vec<i64> {
+    let query_result: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -50,7 +46,7 @@ pub async fn request_total(db: &web::Data<AppState>) -> Vec<(i64)> {
 }
 
 pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, String, i32)> {
-    let query_result_list: Vec<(QueryResult)> = db.conn.query_all(Statement::from_string(
+    let query_result_list: Vec<QueryResult> = db.conn.query_all(Statement::from_string(
         DatabaseBackend::MySql,
         "SELECT CAST(DATE(timestamp) AS datetime) AS date, domain_id, COUNT(*) AS total_requests
             FROM web_spy.request
@@ -67,7 +63,7 @@ pub async fn daily_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, Str
 }
 
 pub async fn daily_blocked_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLocal, i32)> {
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -88,7 +84,7 @@ pub async fn daily_blocked_activity(db: &web::Data<AppState>) -> Vec<(DateTimeLo
 }
 
 pub async fn domain_activity(db: &web::Data<AppState>) -> Vec<(String, i64)> {
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -107,7 +103,7 @@ pub async fn domain_activity(db: &web::Data<AppState>) -> Vec<(String, i64)> {
 }
 
 pub async fn endpoint_frequency(db: &web::Data<AppState>) -> Vec<(String, String, String, i32)> {
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -135,7 +131,7 @@ pub async fn daily_activity_by_user(
         return vec![];
     };
 
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -166,7 +162,7 @@ pub async fn daily_activity_by_user_by_domain(
         return vec![];
     };
 
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -198,7 +194,7 @@ pub async fn domain_activity_by_user(
         return vec![];
     };
 
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,
@@ -229,7 +225,7 @@ pub async fn endpoint_frequency_by_user(
         return vec![];
     };
 
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,

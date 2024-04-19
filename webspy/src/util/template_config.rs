@@ -1,7 +1,7 @@
-use crate::HANDLEBARS_TEMPLATE;
 use actix_web::{HttpResponse, Responder};
 use handlebars::RenderError;
-use serde_json::json;
+
+use crate::HANDLEBARS_TEMPLATE;
 
 pub fn template_resources() {
     let mut reg = HANDLEBARS_TEMPLATE.write().unwrap();

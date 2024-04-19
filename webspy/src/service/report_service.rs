@@ -50,32 +50,32 @@ pub async fn save_request(
         client_host: report
             .client_host
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         client_port: report
             .client_port
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         client_user: report
             .client_user
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         client_locale: report
             .client_locale
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         user_agent: ActiveValue::Set(report.user_agent.to_string()),
         session: report
             .session
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         cookies: report
             .cookies
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         request_uri: report
             .request_uri
             .clone()
-            .map_or(ActiveValue::Set("".to_string()), |a| ActiveValue::Set(a)),
+            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         request_url: ActiveValue::Set(report.request_url.to_string()),
         request_method: ActiveValue::Set(report.request_method.to_string()),
         request_header: ActiveValue::Set(report.request_header.to_string()),

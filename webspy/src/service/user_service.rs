@@ -1,18 +1,16 @@
-use crate::data_transfer_object::new_domain::NewDomain;
-use crate::data_transfer_object::new_user::NewUser;
-use crate::model::user::Model;
-use crate::model::{request, user};
-use crate::service::AppState;
-use crate::util::threat_level::DangerLevel;
 use actix_web::web;
 use chrono::Local;
 use sea_orm::prelude::DateTimeLocal;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DatabaseBackend, DbBackend, DbErr,
-    EntityTrait, JoinType, QueryFilter, QueryOrder, QueryResult, QuerySelect, QueryTrait,
-    RelationDef, RelationTrait, Statement,
+    ActiveModelTrait, ActiveValue, ColumnTrait, ConnectionTrait, DatabaseBackend, DbErr,
+    EntityTrait, QueryFilter, QueryOrder, QueryResult, Statement,
 };
-use uuid::Uuid;
+
+use crate::data_transfer_object::new_user::NewUser;
+use crate::model::user;
+use crate::model::user::Model;
+use crate::service::AppState;
+use crate::util::threat_level::DangerLevel;
 
 pub async fn user_check(ip: &String, db: &web::Data<AppState>) -> Result<Option<Model>, DbErr> {
     user::Entity::find_by_id(ip).one(&db.conn).await
@@ -28,7 +26,7 @@ pub async fn all_users(db: &web::Data<AppState>) -> Vec<user::Model> {
 
 // type CoolRow = Vec<(String, Option<DateTimeLocal>)>;
 pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateTimeLocal>)> {
-    let query_result_list: Vec<(QueryResult)> = db
+    let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
             DatabaseBackend::MySql,

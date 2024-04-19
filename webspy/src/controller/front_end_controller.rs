@@ -2,7 +2,7 @@ use crate::service::AppState;
 use crate::util::template_config::template_validity;
 use crate::HANDLEBARS_TEMPLATE;
 use actix_web::{get, post, web, HttpResponse, Responder};
-use handlebars::{Handlebars, RenderError};
+use handlebars::Handlebars;
 use serde_json::json;
 
 #[get("/")]
@@ -23,7 +23,7 @@ pub async fn index(db: web::Data<AppState>) -> impl Responder {
 }
 
 #[get("/dashboard")]
-pub async fn dashboard(db: web::Data<AppState>) -> impl Responder {
+pub async fn dashboard(_db: web::Data<AppState>) -> impl Responder {
     let reg = HANDLEBARS_TEMPLATE.read().unwrap();
     let model = json!({
         "title": "Dashboard",
@@ -39,8 +39,8 @@ pub async fn dashboard(db: web::Data<AppState>) -> impl Responder {
 }
 
 #[post("/echo")]
-pub async fn echo(req_body: String) -> impl Responder {
-    let mut reg = Handlebars::new();
+pub async fn echo(_req_body: String) -> impl Responder {
+    let reg = Handlebars::new();
     template_validity(reg.render_template(include_str!("../main.rs"), &json!({"name": "foo"})))
 }
 

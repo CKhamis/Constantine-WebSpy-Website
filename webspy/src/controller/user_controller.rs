@@ -1,7 +1,8 @@
-use crate::service::user_service::{active_users, all_users, banned_users};
-use crate::service::{user_service, AppState};
 use actix_web::http::header::ContentType;
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, web, HttpResponse, Responder};
+
+use crate::service::user_service::{active_users, all_users, banned_users};
+use crate::service::AppState;
 
 #[get("/api/user/all")]
 pub async fn get_all_users(db: web::Data<AppState>) -> impl Responder {

@@ -1,10 +1,8 @@
 use actix_web::{web, App, HttpServer};
-use handlebars::Handlebars;
-use sea_orm::{
-    ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema,
-};
+
+use sea_orm::{ConnectionTrait, Database, Schema};
 use std::env;
-use std::sync::RwLock;
+
 use webspy::controller::analytics_controller::*;
 use webspy::controller::controller_prelude::*;
 use webspy::controller::domain_controller::{all_domains, new_domain};
@@ -14,10 +12,9 @@ use webspy::controller::report_controller::{
 };
 use webspy::controller::user_controller::*;
 use webspy::model::{domain, request, user};
-use webspy::service::analytics_service::unique_users_per_domain;
+
 use webspy::service::AppState;
 use webspy::util::template_config::template_resources;
-use webspy::HANDLEBARS_TEMPLATE;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

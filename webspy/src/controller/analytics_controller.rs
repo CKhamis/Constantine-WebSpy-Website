@@ -64,7 +64,7 @@ pub async fn daily_requests_by_user(
     ip_address: web::Path<String>,
     db: web::Data<AppState>,
 ) -> impl Responder {
-    match serde_json::to_string(&daily_activity_by_user(&ip_address.trim(), &db).await) {
+    match serde_json::to_string(&daily_activity_by_user(ip_address.trim(), &db).await) {
         Ok(response) => HttpResponse::Ok()
             .insert_header(ContentType::json())
             .body(response),
@@ -77,7 +77,7 @@ pub async fn daily_requests_by_user_by_domain(
     ip_address: web::Path<String>,
     db: web::Data<AppState>,
 ) -> impl Responder {
-    match serde_json::to_string(&daily_activity_by_user_by_domain(&ip_address.trim(), &db).await) {
+    match serde_json::to_string(&daily_activity_by_user_by_domain(ip_address.trim(), &db).await) {
         Ok(response) => HttpResponse::Ok()
             .insert_header(ContentType::json())
             .body(response),
