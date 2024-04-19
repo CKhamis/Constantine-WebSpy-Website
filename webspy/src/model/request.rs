@@ -13,24 +13,24 @@ impl EntityName for crate::model::request::Entity {
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveModel, DeriveActiveModel)]
-pub struct Model{
-    pub id:i32,
-    pub ip:String,
-    pub client_host:String,
-    pub client_port:String,
-    pub client_user:String,
-    pub client_locale:String,
-    pub user_agent:String,
-    pub session:String,
-    pub cookies:String,
-    pub request_uri:String,
-    pub request_url:String,
-    pub request_method:String,
-    pub request_header:String,
-    pub request_protocol:String,
-    pub request_scheme:String,
-    pub blocked:bool,
-    pub timestamp:DateTimeLocal,
+pub struct Model {
+    pub id: i32,
+    pub ip: String,
+    pub client_host: String,
+    pub client_port: String,
+    pub client_user: String,
+    pub client_locale: String,
+    pub user_agent: String,
+    pub session: String,
+    pub cookies: String,
+    pub request_uri: String,
+    pub request_url: String,
+    pub request_method: String,
+    pub request_header: String,
+    pub request_protocol: String,
+    pub request_scheme: String,
+    pub blocked: bool,
+    pub timestamp: DateTimeLocal,
     pub domain_id: String,
 }
 
@@ -91,7 +91,7 @@ impl ColumnTrait for crate::model::request::Column {
             Column::RequestScheme => ColumnType::Text.def(),
             Column::Blocked => ColumnType::Boolean.def(),
             Column::Timestamp => ColumnType::Timestamp.def(),
-            Column::DomainId => ColumnType::String(Some(255)).def()
+            Column::DomainId => ColumnType::String(Some(255)).def(),
         }
     }
 }

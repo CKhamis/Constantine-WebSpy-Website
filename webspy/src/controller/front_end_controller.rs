@@ -1,9 +1,9 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use handlebars::{Handlebars, RenderError};
-use serde_json::json;
-use crate::HANDLEBARS_TEMPLATE;
 use crate::service::AppState;
 use crate::util::template_config::template_validity;
+use crate::HANDLEBARS_TEMPLATE;
+use actix_web::{get, post, web, HttpResponse, Responder};
+use handlebars::{Handlebars, RenderError};
+use serde_json::json;
 
 #[get("/")]
 pub async fn index(db: web::Data<AppState>) -> impl Responder {
@@ -14,7 +14,8 @@ pub async fn index(db: web::Data<AppState>) -> impl Responder {
         "authenticated": true,
     });
 
-    let rendered_content = reg.render("home", &model)
+    let rendered_content = reg
+        .render("home", &model)
         .expect("Failed to render template");
 
     // Assuming `template_validity` is a function that checks the validity of the rendered template
@@ -29,7 +30,8 @@ pub async fn dashboard(db: web::Data<AppState>) -> impl Responder {
         "authenticated": false,
     });
 
-    let rendered_content = reg.render("dashboard", &model)
+    let rendered_content = reg
+        .render("dashboard", &model)
         .expect("Failed to render template");
 
     // Assuming `template_validity` is a function that checks the validity of the rendered template

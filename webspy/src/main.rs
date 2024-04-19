@@ -1,23 +1,34 @@
-use webspy::service::AppState;
+use actix_web::{web, App, HttpServer};
+use handlebars::Handlebars;
+use sea_orm::{
+    ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema,
+};
 use std::env;
 use std::sync::RwLock;
-use actix_web::{App, HttpServer, web};
-use handlebars::Handlebars;
-use sea_orm::{ConnectionTrait, Database, DatabaseConnection, DbErr, ExecResult, RuntimeErr, Schema};
 use webspy::controller::analytics_controller::*;
 use webspy::controller::controller_prelude::*;
 use webspy::controller::domain_controller::{all_domains, new_domain};
-use webspy::controller::report_controller::{get_report_by_domain, get_report_by_user, report_request};
-use webspy::controller::user_controller::*;
-use webspy::HANDLEBARS_TEMPLATE;
-use webspy::model::{user, domain, request};
-use webspy::service::analytics_service::unique_users_per_domain;
 use webspy::controller::report_controller::*;
+use webspy::controller::report_controller::{
+    get_report_by_domain, get_report_by_user, report_request,
+};
+use webspy::controller::user_controller::*;
+use webspy::model::{domain, request, user};
+use webspy::service::analytics_service::unique_users_per_domain;
+use webspy::service::AppState;
 use webspy::util::template_config::template_resources;
+use webspy::HANDLEBARS_TEMPLATE;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // todo: make env vars to work
+
+    let webserver_bind_address = env::var("WEB_BIND_IP").unwrap_or("0.0.0.0".to_string());
+    let webserver_bind_port = env::var("WEB_BIND_PORT")
+        .unwrap_or("8080".to_string())
+        .parse()
+        .expect("Unable to parse web bind port into a number");
+
     let db_url = env::var("DB_URL").unwrap_or("/web_spy".to_string());
     let host = env::var("DB_HOST").unwrap_or("localhost".to_string());
     let username = env::var("DB_USERNAME").unwrap_or("root".to_string());
@@ -36,32 +47,50 @@ async fn main() -> std::io::Result<()> {
     let builder = connection.get_database_backend();
     let schema = Schema::new(builder);
     let domain_table = builder.build(&schema.create_table_from_entity(domain::Entity));
-    match connection.execute(domain_table).await{
-        Ok(_) => {println!("Creating new table: domain");}
+    match connection.execute(domain_table).await {
+        Ok(_) => {
+            println!("Creating new table: domain");
+        }
         Err(e) => {
             // Crash program if table could not be created if not exists
             println!("{}", e);
-            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
+            assert!(
+                e.to_string().contains("1050") && e.to_string().contains("already exists"),
+                "{:?}",
+                e
+            );
         }
     }
     let ban_table = builder.build(&schema.create_table_from_entity(user::Entity));
-    match connection.execute(ban_table).await{
-        Ok(_) => {println!("Creating new table: ban");}
+    match connection.execute(ban_table).await {
+        Ok(_) => {
+            println!("Creating new table: ban");
+        }
         Err(e) => {
             // Crash program if table could not be created if not exists
-            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
+            assert!(
+                e.to_string().contains("1050") && e.to_string().contains("already exists"),
+                "{:?}",
+                e
+            );
         }
     }
     let request_table = builder.build(&schema.create_table_from_entity(request::Entity));
-    match connection.execute(request_table).await{
-        Ok(_) => {println!("Creating new table: request");}
+    match connection.execute(request_table).await {
+        Ok(_) => {
+            println!("Creating new table: request");
+        }
         Err(e) => {
             // Crash program if table could not be created if not exists
-            assert!(e.to_string().contains("1050") && e.to_string().contains("already exists"), "{:?}", e);
+            assert!(
+                e.to_string().contains("1050") && e.to_string().contains("already exists"),
+                "{:?}",
+                e
+            );
         }
     }
 
-    let app_state = AppState{ conn: connection };
+    let app_state = AppState { conn: connection };
     println!("//////////// Constantine WebSpy //////////////");
     HttpServer::new(move || {
         App::new()
@@ -89,11 +118,14 @@ async fn main() -> std::io::Result<()> {
             .service(get_all_reports)
             // .service(new_ban)
             // .service(all_bans)
-            .service(actix_files::Files::new("/static", "./webspy/resources/static"))
+            .service(actix_files::Files::new(
+                "/static",
+                "./webspy/resources/static",
+            ))
             .route("/hey", web::get().to(manual_hello))
             .app_data(web::Data::new(app_state.clone()))
     })
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    .bind((webserver_bind_address, webserver_bind_port))?
+    .run()
+    .await
 }
