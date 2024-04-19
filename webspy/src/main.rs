@@ -18,12 +18,18 @@ use webspy::util::template_config::template_resources;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // todo: make env vars to work
-    // let db_url = env::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-    // let host = env::var("HOST").expect("HOST is not set in .env file");
-    // let port = env::var("PORT").expect("PORT is not set in .env file");
-    // let server_url = format!("{host}:{port}");
+    let db_url = env::var("DB_URL").unwrap_or("/web_spy".to_string());
+    let host = env::var("DB_HOST").unwrap_or("localhost".to_string());
+    let username = env::var("DB_USERNAME").unwrap_or("root".to_string());
+    let password = env::var("DB_PASSWORD").unwrap_or("1234".to_string());
 
-    let connection = Database::connect("mysql://root:1234@localhost/web_spy").await.unwrap();
+    let server_url = format!("mysql://{username}:{password}@{host}{db_url}");
+
+    #[cfg(debug_assertions)]
+    println!("{}", server_url);
+
+    // "mysql://root:1234@localhost/web_spy"
+    let connection = Database::connect(server_url).await.unwrap();
     template_resources();
 
     //Create tables

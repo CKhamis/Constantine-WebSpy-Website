@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  web:
+    image: "webspy:latest"
+    build:
+      context: "./"
+      dockerfile: "./Dockerfile"
+    container_name: "webspy"
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL = "/web_spy"
+      - DB_HOST = "db"
+      - DB_USERNAME = "root"
+      - DB_PASSWORD = "1234"
+    depends_on:
+      - db
+  db:
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_DATABASE: costi_online
+      MYSQL_ROOT_PASSWORD: 1234
+    ports:
+      - "8005:3306"

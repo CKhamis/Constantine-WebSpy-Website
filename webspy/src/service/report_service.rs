@@ -1,7 +1,6 @@
 use actix_web::web;
 use sea_orm::{ActiveModelTrait, ActiveValue, ColumnTrait, DatabaseConnection, DbErr, EntityTrait, QueryFilter, QueryOrder, QuerySelect};
 use sqlx::types::chrono::Local;
-use uuid::Uuid;
 use crate::data_transfer_object::report::Report;
 use crate::model::{domain, request};
 use crate::model::request::{Model};
