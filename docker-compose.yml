@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   web:
     image: "webspy:latest"
@@ -11,10 +9,12 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_URL = "/web_spy"
-      - DB_HOST = "db"
-      - DB_USERNAME = "root"
-      - DB_PASSWORD = "1234"
+      - DB_URL=/web_spy
+      - DB_HOST=db
+      - DB_USERNAME=root
+      - DB_PASSWORD=1234
+      - WEB_BIND_IP=0.0.0.0
+      - WEB_BIND_PORT=1984
     depends_on:
       - db
   db:
@@ -22,7 +22,7 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
-      MYSQL_DATABASE: costi_online
+      MYSQL_DATABASE: web_spy
       MYSQL_ROOT_PASSWORD: 1234
     ports:
       - "8005:3306"
