@@ -47,10 +47,6 @@ pub async fn save_request(
     let incoming_request = crate::model::request::ActiveModel {
         id: ActiveValue::NotSet,
         ip: ActiveValue::Set(report.ip.to_string()),
-        client_host: report
-            .client_host
-            .clone()
-            .map_or(ActiveValue::Set("".to_string()), ActiveValue::Set),
         client_port: report
             .client_port
             .clone()

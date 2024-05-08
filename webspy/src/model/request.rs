@@ -16,7 +16,6 @@ impl EntityName for crate::model::request::Entity {
 pub struct Model {
     pub id: i32,
     pub ip: String,
-    pub client_host: String,
     pub client_port: String,
     pub client_user: String,
     pub client_locale: String,
@@ -51,7 +50,6 @@ impl PrimaryKeyTrait for PrimaryKey {
 pub enum Column {
     Id,
     Ip,
-    ClientHost,
     ClientPort,
     ClientUser,
     ClientLocale,
@@ -76,7 +74,6 @@ impl ColumnTrait for crate::model::request::Column {
         match self {
             Column::Id => ColumnType::Integer.def(),
             Column::Ip => ColumnType::String(Some(255)).def(),
-            Column::ClientHost => ColumnType::Text.def(),
             Column::ClientPort => ColumnType::Text.def(),
             Column::ClientUser => ColumnType::Text.def(),
             Column::ClientLocale => ColumnType::Text.def(),
