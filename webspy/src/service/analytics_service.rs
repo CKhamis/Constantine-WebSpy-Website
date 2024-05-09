@@ -7,7 +7,7 @@ use sea_orm::{ConnectionTrait, DatabaseBackend, QueryResult, Statement};
 
 use crate::service::AppState;
 
-pub async fn unique_users_per_domain(db: &web::Data<AppState>) -> Vec<(String, i64)> {
+pub async fn unique_ips_per_domain(db: &web::Data<AppState>) -> Vec<(String, i64)> {
     let query_result_list: Vec<QueryResult> = db
         .conn
         .query_all(Statement::from_string(
@@ -122,7 +122,7 @@ pub async fn endpoint_frequency(db: &web::Data<AppState>) -> Vec<(String, String
         .collect()
 }
 
-pub async fn daily_activity_by_user(
+pub async fn daily_activity_by_ip(
     ip_address: &str,
     db: &web::Data<AppState>,
 ) -> Vec<(DateTimeLocal, i32)> {
@@ -153,7 +153,7 @@ pub async fn daily_activity_by_user(
         .collect()
 }
 
-pub async fn daily_activity_by_user_by_domain(
+pub async fn daily_activity_by_ip_by_domain(
     ip_address: &str,
     db: &web::Data<AppState>,
 ) -> Vec<(String, DateTimeLocal, i32)> {
@@ -185,7 +185,7 @@ pub async fn daily_activity_by_user_by_domain(
         .collect()
 }
 
-pub async fn domain_activity_by_user(
+pub async fn domain_activity_by_ip(
     ip_address: &str,
     db: &web::Data<AppState>,
 ) -> Vec<(String, i64)> {
@@ -216,7 +216,7 @@ pub async fn domain_activity_by_user(
         .collect()
 }
 
-pub async fn endpoint_frequency_by_user(
+pub async fn endpoint_frequency_by_ip(
     ip_address: &str,
     db: &web::Data<AppState>,
 ) -> Vec<(String, String, String, i32)> {

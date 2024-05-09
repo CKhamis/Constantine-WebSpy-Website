@@ -13,7 +13,7 @@
     Chart.defaults.plugins.legend.labels.color = 'white';
     Chart.defaults.plugins.title.display = false;
 
-    let domainList, userList, uniqueUsersPerDomain, requestsList, endpointRequestFrequency, requestTotal, blockedRequestsDailyCount;
+    let domainList, ipList, uniqueIpsPerDomain, requestsList, endpointRequestFrequency, requestTotal, blockedRequestsDailyCount;
 
     init();
 
@@ -24,14 +24,14 @@
 
     function refresh(){
         const contentFetch = fetch("/api/domain/all");
-        const userFetch = fetch("/api/user/all");
+        const ipFetch = fetch("/api/ip/all");
         const requestFetch = fetch("/api/analytics/domain-requests");
-        const uniqueUsersPerDomainFetch = fetch("/api/analytics/unique-users-all-domains");
+        const uniqueIpsPerDomainFetch = fetch("/api/analytics/unique-ips-all-domains");
         const endpointRequestFrequencyFetch = fetch("/api/analytics/endpoint-requests");
         const requestTotalFetch = fetch("/api/analytics/request-total");
         const dailyBlockedFetch = fetch("/api/analytics/daily-blocked-requests");
 
-        Promise.all([contentFetch, userFetch, uniqueUsersPerDomainFetch, requestFetch, endpointRequestFrequencyFetch, requestTotalFetch, dailyBlockedFetch])
+        Promise.all([contentFetch, ipFetch, uniqueIpsPerDomainFetch, requestFetch, endpointRequestFrequencyFetch, requestTotalFetch, dailyBlockedFetch])
                 .then(responses => {
                     const response1 = checkStatus(responses[0]);
                     const response2 = checkStatus(responses[1]);
@@ -56,8 +56,8 @@
                 })
                 .then(data => {
                     domainList = data[0];
-                    userList = data[1];
-                    uniqueUsersPerDomain = data[2];
+                    ipList = data[1];
+                    uniqueIpsPerDomain = data[2];
                     requestsList = data[3];
                     endpointRequestFrequency = data[4];
                     requestTotal = data[5];
@@ -206,8 +206,8 @@
                     });
                     domainTable += `</tbody></table>`;
 
-                    // User activity table
-                    let userActivityTable = `
+                    // ip activity table
+                    let ipActivityTable = `
                             <table class="table table-dark table-striped table-responsive">
                                 <thead class="table-dark">
                                     <tr>
@@ -219,7 +219,7 @@
                                 <tbody>
                         `;
                     domainActivity.forEach((request) => {
-                        userActivityTable += `
+                        ipActivityTable += `
                             <tr>
                                 <th scope="row" onclick="viewDomain('${request[1]}')" role="button">${request[1]}</th>
                                 <td>${formatDateTime(request[0])}</th>
@@ -227,7 +227,7 @@
                             </tr>
                             `;
                     });
-                    userActivityTable += `</tbody></table>`;
+                    ipActivityTable += `</tbody></table>`;
 
                     let container = document.querySelector("#main-content");
                     container.innerHTML = `
@@ -258,15 +258,15 @@
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
                                     <h5 class="fw-bold text-center">Total Requests</h5>
                                     <p class="fs-4 text-center">${requestTotal}</p>
-                                    <h5 class="fw-bold text-center">Unique Users</h5>
-                                    <p class="fs-4 text-center">${userList.length}</p>
+                                    <h5 class="fw-bold text-center">Unique Ips</h5>
+                                    <p class="fs-4 text-center">${ipList.length}</p>
                                     <h5 class="fw-bold text-center">Reporting Domains</h5>
                                     <p class="fs-4 text-center">${domainList.length}</p>
                                 </div>
                             </div>
                             <div class="col-12 col-lg-4 mb-3">
                                 <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                    <h5 class="fw-bold text-center">Blocked Users</h5>
+                                    <h5 class="fw-bold text-center">Blocked Ips</h5>
                                     <p class="fs-4 text-center">4</p>
                                     <h5 class="fw-bold text-center">Blocked Requests</h5>
                                     <p class="fs-4 text-center">${totalBlockedRequests}</p>
@@ -298,7 +298,7 @@
                                       <div class="tab-pane fade show overflow-auto active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0">${reportTable}</div>
                                       <div class="tab-pane overflow-auto fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0">${endpointTable}</div>
                                       <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
-                                      <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${userActivityTable}</div>
+                                      <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${ipActivityTable}</div>
                                     </div>
                                 </div>
                             </div>
@@ -447,14 +447,14 @@
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                        <h4 class="fw-bold text-center">Most Active User</h4>
+                                        <h4 class="fw-bold text-center">Most Active Ip</h4>
                                         <p class="fs-4 text-center mb-0">Poopsie</p>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                        <h5 class="fw-bold text-center">Unique Users</h5>
-                                        <p class="fs-4 text-center mb-0">${uniqueUsersPerDomainLookup(domain.domain)}</p>
+                                        <h5 class="fw-bold text-center">Unique Ips</h5>
+                                        <p class="fs-4 text-center mb-0">${uniqueIpsPerDomainLookup(domain.domain)}</p>
                                     </div>
                                 </div>
                                 <div class="col-lg-4 col-12 mb-3">
@@ -531,23 +531,23 @@
         }
     }
 
-    function renderAllUsers(){
+    function renderAllIps(){
         let container = document.querySelector("#main-content");
         let htmlContent = `
             <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
-                <h2 class="fw-bold fs-1">All Users</h2>
+                <h2 class="fw-bold fs-1">All Ips</h2>
             </div>
             <div class="container-fluid">
-                <p class="fs-4">Ordered ${userList.length} users by date discovered</p>
+                <p class="fs-4">Ordered ${ipList.length} ips by date discovered</p>
                 <div class="row row-cols-1 row-cols-md-3 row cols-lg-4">
         `;
-        userList.forEach((user) => {
+        ipList.forEach((ip) => {
             let htmlDomain = `
                 <div class="col mb-4">
-                    <div class="px-3 py-3 rounded-3 ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}" onclick="viewUser('${user.ip}')">
-                        <h3>${user.ip}</h3>
-                        <p class="mb-0">${user.nickname !== 'null' ? "No Name" : user.nickname} &#8226; ${createBadge(user.threat_level)}</p>
-                        ${hasAlreadyPassed(user.expire)? "<p>Access Accepted</p>" : "<p>Access Denied</p>"}
+                    <div class="px-3 py-3 rounded-3 ${hasAlreadyPassed(ip.expire) ? "bg-dark" : "alert alert-danger"}" onclick="viewIp('${ip.ip}')">
+                        <h3>${ip.ip}</h3>
+                        <p class="mb-0">${ip.nickname !== 'null' ? "No Name" : ip.nickname} &#8226; ${createBadge(ip.threat_level)}</p>
+                        ${hasAlreadyPassed(ip.expire) ? "<p>Access Accepted</p>" : "<p>Access Denied</p>"}
                     </div>
                 </div>
             `;
@@ -590,38 +590,38 @@
         container.innerHTML = htmlContent;
     }
 
-    function viewUser(ip, err=""){
+    function viewIp(ip, err=""){
         let container = document.querySelector("#main-content");
         if(ip===""){
             container.innerHTML = `
             <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
-                <h2 class="fw-bold fs-1">User Details</h2>
+                <h2 class="fw-bold fs-1">Ip Details</h2>
             </div>
             <div class="container-fluid" style="margin-top: 100px; margin-bottom: 100px;">
                 <div class="row">
                     <div class="col-md-6 offset-md-3 p-4">
-                        <h2 class="fw-bold text-center mb-2">User lookup</h2>
+                        <h2 class="fw-bold text-center mb-2">Ip lookup</h2>
                         ${err != ""? `<div class='alert alert-danger alert-dismissible fade show'>${err}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>` : ""}
-                        <label for="user-lookup-form" class="form-label">IP address of user</label>
+                        <label for="user-lookup-form" class="form-label">IP address</label>
                         <input class="form-control form-control-lg" id="user-lookup-form" type="text" placeholder="192.168.0.1" aria-describedby="ipHelper">
                         <div id="ipHelper" class="form-text">ID must be exact</div>
-                        <button class="btn btn-primary mb-3 mt-3" onclick="searchUserButton()">Search User</button>
+                        <button class="btn btn-primary mb-3 mt-3" onclick="searchIpButton()">Search Ip</button>
                     </div>
                 </div>
             </div>
 
             `;
         }else{
-            // Check to see if user exists
-            let user = userLookup(ip);
+            // Check to see if ip exists
+            let ip = ipLookup(ip);
 
-            if(user === undefined || user == null){
-                // User not found
-                viewUser('', "User not found");
+            if(ip === undefined || ip == null){
+                // Ip not found
+                viewIp('', "Ip not found");
             }
 
             // Query database for reports
-            Promise.all([fetch('/api/report/user/' + ip), fetch('/api/analytics/endpoint-requests/' + ip), fetch('/api/analytics/domain-requests/' + ip), fetch('/api/analytics/daily-requests-by-domain/' + ip)])
+            Promise.all([fetch('/api/report/ip/' + ip), fetch('/api/analytics/endpoint-requests/' + ip), fetch('/api/analytics/domain-requests/' + ip), fetch('/api/analytics/daily-requests-by-domain/' + ip)])
                     .then(responses => {
                         const response1 = checkStatus(responses[0]);
                         const response2 = checkStatus(responses[1]);
@@ -639,12 +639,12 @@
                         return Promise.all([response1, response2, response3, response4]);
                     })
                     .then(data => {
-                        let userReports = data[0];
+                        let ipReports = data[0];
                         let requestFrequency = data[1];
                         let domainFrequency = data[2];
                         let dailyDomainFrequency = data[3];
-                        let lastSeen = userReports.length === 0? `N/A` : formatDate(userReports[0].timestamp);
-                        let firstSeen = formatDate(user.first_seen);
+                        let lastSeen = ipReports.length === 0? `N/A` : formatDate(ipReports[0].timestamp);
+                        let firstSeen = formatDate(ip.first_seen);
                         let numBlocked = 0;
                         let topEndpoints = "";
                         for(let i = 0; i < requestFrequency.length && i < 7; i++){
@@ -669,7 +669,7 @@
                                 </thead>
                                 <tbody>
                         `;
-                        userReports.forEach((request) => {
+                        ipReports.forEach((request) => {
                             reportTable += `
                             <tr>
                                 <th scope="row">${request.domain_id}</th>
@@ -736,8 +736,8 @@
                         });
                         domainTable += `</tbody></table>`;
 
-                        // User activity table
-                        let userActivityTable = `
+                        // Ip activity table
+                        let ipActivityTable = `
                             <table class="table table-dark table-striped table-responsive">
                                 <thead class="table-dark">
                                     <tr>
@@ -749,7 +749,7 @@
                                 <tbody>
                         `;
                         dailyDomainFrequency.forEach((request) => {
-                            userActivityTable += `
+                            ipActivityTable += `
                             <tr>
                                 <th scope="row">${request[0]}</th>
                                 <td>${formatDateTime(request[1])}</th>
@@ -757,66 +757,66 @@
                             </tr>
                             `;
                         });
-                        userActivityTable += `</tbody></table>`;
+                        ipActivityTable += `</tbody></table>`;
 
                         // OS and Browser icons
                         let osIcon = "N/A";
-                        if(userReports.length > 0){
-                            if (userReports[userReports.length-1].user_agent.includes("Windows")) {
+                        if(ipReports.length > 0){
+                            if (ipReports[ipReports.length-1].user_agent.includes("Windows")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/Windows.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("mac")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("mac")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/MacOS.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("linux")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("linux")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/Linux.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("ios")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("ios")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/iOS.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("android")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("android")) {
                                 osIcon = `<img class="browser-icon" src="/static/icons/Android.svg" />`;
                             }
                         }
 
                         let browser = "N/A";
-                        if(userReports.length > 0){
-                            if (userReports[userReports.length-1].user_agent.includes("Chrome")) {
+                        if(ipReports.length > 0){
+                            if (ipReports[ipReports.length-1].user_agent.includes("Chrome")) {
                                 browser = `<img class="browser-icon" src="/static/icons/Chrome.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("Safari")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("Safari")) {
                                 browser = `<img class="browser-icon" src="/static/icons/Safari.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("Firefox")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("Firefox")) {
                                 browser = `<img class="browser-icon" src="/static/icons/Firefox.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("Edge")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("Edge")) {
                                 browser = `<img class="browser-icon" src="/static/icons/Edge.svg" />`;
-                            } else if (userReports[userReports.length-1].user_agent.includes("Opera")) {
+                            } else if (ipReports[ipReports.length-1].user_agent.includes("Opera")) {
                                 browser = `<img class="browser-icon" src="/static/icons/Opera.svg" />`;
                             }
                         }
 
                         container.innerHTML = `
                         <div class="d-flex justify-content-center align-items-end p-4 tiled-WS-background mb-3" style="position: relative;">
-                            <h2 class="fw-bold fs-1">User Details</h2>
+                            <h2 class="fw-bold fs-1">Ip Details</h2>
                         </div>
                         <div class="container-fluid">
                             <div class="row">
                                 <div class="col-12 mb-2 d-flex align-items-center justify-content-between">
-                                    <div><a class="text-secondary fs-4" onclick="renderAllUsers()">&lt; All Users</a></div>
-                                    <div><a class="text-secondary fs-4" onclick="viewUser('${user.ip}')">Refresh</a></div>
+                                    <div><a class="text-secondary fs-4" onclick="renderAllIps()">&lt; All Ips</a></div>
+                                    <div><a class="text-secondary fs-4" onclick="viewIp('${ip.ip}')">Refresh</a></div>
                                     <div>
                                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal">
-                                          Edit User
+                                          Edit Ip
                                         </button>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-4 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                        <h1 class="text-center fw-bold">${user.ip}</h1>
-                                        <h5 class="text-center fw-bold mb-5">${user.nickname !== 'null' ? "No name" : user.nickname}</h5>
-                                        <p class="text-center fs-4">${createBadge(user.threat_level)}</p>
-                                        <p class="fw-bold text-center fs-4">Total Requests: ${userReports.length}</p>
+                                        <h1 class="text-center fw-bold">${ip.ip}</h1>
+                                        <h5 class="text-center fw-bold mb-5">${ip.nickname !== 'null' ? "No name" : ip.nickname}</h5>
+                                        <p class="text-center fs-4">${createBadge(ip.threat_level)}</p>
+                                        <p class="fw-bold text-center fs-4">Total Requests: ${ipReports.length}</p>
                                     </div>
                                 </div>
                                 <div class="col-lg-8 col-12 mb-3">
                                     <div class="px-3 py-3 rounded-3 bg-dark h-100">
-                                        <h4 class="fw-bold text-center">User Requests</h4>
+                                        <h4 class="fw-bold text-center">Ip Requests</h4>
                                         <canvas id="activity-chart"></canvas>
                                     </div>
                                 </div>
@@ -851,12 +851,12 @@
                                     </div>
                                 </div>
                                 <div class="col-12 mb-3">
-                                    <div class="px-3 py-3 rounded-3 d-flex align-items-center justify-content-between ${hasAlreadyPassed(user.expire)? "bg-dark" : "alert alert-danger"}">
+                                    <div class="px-3 py-3 rounded-3 d-flex align-items-center justify-content-between ${hasAlreadyPassed(ip.expire) ? "bg-dark" : "alert alert-danger"}">
                                         <div>
                                             <h2 class="fw-bold">Conditional Access</h2>
                                         </div>
-                                        <div>${hasAlreadyPassed(user.expire)? "<h2>Traffic Allowed</h2>" : "<h5 class='text-center fw-bold'>Blocked Requests</h5><p class='fs-3 mb-0 text-center'>" + numBlocked + "</p>"}</div>
-                                        ${hasAlreadyPassed(user.expire)? "" : "<div>" + user.reason + "</div>"}
+                                        <div>${hasAlreadyPassed(ip.expire) ? "<h2>Traffic Allowed</h2>" : "<h5 class='text-center fw-bold'>Blocked Requests</h5><p class='fs-3 mb-0 text-center'>" + numBlocked + "</p>"}</div>
+                                        ${hasAlreadyPassed(ip.expire) ? "" : "<div>" + ip.reason + "</div>"}
                                     </div>
                                 </div>
                                 <div class="col-12 mb-2">
@@ -879,7 +879,7 @@
                                           <div class="tab-pane fade show overflow-auto active" id="request-by-date-tab-pane" role="tabpanel" aria-labelledby="request-by-date-tab" tabindex="0">${reportTable}</div>
                                           <div class="tab-pane overflow-auto fade" id="endpoint-frequency-tab-pane" role="tabpanel" aria-labelledby="endpoint-frequency-tab" tabindex="0">${endpointTable}</div>
                                           <div class="tab-pane overflow-auto fade" id="domain-frequency-tab-pane" role="tabpanel" aria-labelledby="domain-frequency-tab" tabindex="0">${domainTable}</div>
-                                          <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${userActivityTable}</div>
+                                          <div class="tab-pane overflow-auto fade" id="daily-domain-frequency-tab-pane" role="tabpanel" aria-labelledby="daily-domain-frequency-tab" tabindex="0">${ipActivityTable}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -890,7 +890,7 @@
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title">Edit User Details</h5>
+                                        <h5 class="modal-title">Edit Ip Details</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                         <div class="modal-body">
@@ -900,7 +900,7 @@
                                                     <input type="text" class="form-control" id="nicknameInput">
                                                 </div>
                                                 <div class="col-12 mb-3">
-                                                    <label for="threatLevel" class="form-label">User Access</label>
+                                                    <label for="threatLevel" class="form-label">Ip Access</label>
                                                         <select class="form-select" id="threatLevel">
                                                             <option value="none" selected>Keep the same</option>
                                                             <option value="delete">Remove Ban</option>
@@ -1009,9 +1009,9 @@
         }
     }
 
-    function searchUserButton(){
+    function searchIpButton(){
         let ip = document.querySelector("#user-lookup-form").value;
-        viewUser(ip);
+        viewIp(ip);
     }
 </script>
 
@@ -1081,14 +1081,14 @@
             }
             return `<span class="${badgeClass}">${status}</span>`;
         };
-    function userLookup(ip){
-        return userList.find(user => user.ip === ip);
+    function ipLookup(ip){
+        return ipList.find(address => address.ip === ip);
     }
     function domainLookup(domain_id){
         return domainList.find(domain => domain.domain === domain_id);
     }
-    function uniqueUsersPerDomainLookup(domain_id){
-        return uniqueUsersPerDomain.find(stat => stat[0] === domain_id)[1];
+    function uniqueIpsPerDomainLookup(domain_id){
+        return uniqueIpsPerDomain.find(stat => stat[0] === domain_id)[1];
     }
     function formatDate(dateString) {
         const date = new Date(dateString);
