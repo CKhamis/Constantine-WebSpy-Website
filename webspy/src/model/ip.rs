@@ -15,7 +15,7 @@ pub struct Entity; // add the entity struct, since we don't plan on generating t
 impl EntityName for Entity {
     // add the table name that the proc macro would have generated
     fn table_name(&self) -> &str {
-        "user"
+        "ip"
     }
 }
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize, DeriveModel, DeriveActiveModel)]

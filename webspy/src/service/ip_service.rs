@@ -6,19 +6,19 @@ use sea_orm::{
     EntityTrait, QueryFilter, QueryOrder, QueryResult, Statement,
 };
 
-use crate::data_transfer_object::new_user::NewUser;
-use crate::model::user;
-use crate::model::user::Model;
+use crate::data_transfer_object::new_ip::newIp;
+use crate::model::ip;
+use crate::model::ip::Model;
 use crate::service::AppState;
 use crate::util::threat_level::DangerLevel;
 
-pub async fn user_check(ip: &String, db: &web::Data<AppState>) -> Result<Option<Model>, DbErr> {
-    user::Entity::find_by_id(ip).one(&db.conn).await
+pub async fn ip_check(ip: &String, db: &web::Data<AppState>) -> Result<Option<Model>, DbErr> {
+    ip::Entity::find_by_id(ip).one(&db.conn).await
 }
 
-pub async fn all_users(db: &web::Data<AppState>) -> Vec<user::Model> {
-    user::Entity::find()
-        .order_by_desc(user::Column::FirstSeen)
+pub async fn all_users(db: &web::Data<AppState>) -> Vec<ip::Model> {
+    ip::Entity::find()
+        .order_by_desc(ip::Column::FirstSeen)
         .all(&db.conn)
         .await
         .unwrap()
@@ -44,18 +44,18 @@ pub async fn active_users(db: &web::Data<AppState>) -> Vec<(String, Option<DateT
         .collect()
 }
 
-pub async fn banned_users(db: &web::Data<AppState>) -> Vec<user::Model> {
+pub async fn banned_users(db: &web::Data<AppState>) -> Vec<ip::Model> {
     let now = Local::now();
-    user::Entity::find()
-        .filter(user::Column::Expire.is_not_null())
-        .filter(user::Column::Expire.gt(now))
+    ip::Entity::find()
+        .filter(ip::Column::Expire.is_not_null())
+        .filter(ip::Column::Expire.gt(now))
         .all(&db.conn)
         .await
         .unwrap()
 }
 
-pub async fn new_user(new_user: NewUser, db: &web::Data<AppState>) -> Result<user::Model, DbErr> {
-    let constructed_model = crate::model::user::ActiveModel {
+pub async fn new_ip(new_user: newIp, db: &web::Data<AppState>) -> Result<ip::Model, DbErr> {
+    let constructed_model = crate::model::ip::ActiveModel {
         ip: ActiveValue::Set(new_user.ip.clone()),
         nickname: ActiveValue::NotSet,
         reason: new_user

@@ -1,3 +1,3 @@
 pub mod domain;
 pub mod request;
-pub mod user;
+pub mod ip;

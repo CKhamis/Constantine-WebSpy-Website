@@ -21,7 +21,7 @@ pub async fn verify_domain(url: &String, conn: &DatabaseConnection) -> bool {
         .is_some()
 }
 
-pub async fn find_by_user(user_ip: &String, conn: &DatabaseConnection) -> Vec<Model> {
+pub async fn find_by_ip(user_ip: &String, conn: &DatabaseConnection) -> Vec<Model> {
     request::Entity::find()
         .filter(request::Column::Ip.eq(user_ip))
         .order_by_desc(request::Column::Timestamp)

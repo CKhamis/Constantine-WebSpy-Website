@@ -99,7 +99,7 @@ impl ActiveModelBehavior for ActiveModel {}
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {
     Domain,
-    User,
+    Ip,
 }
 
 impl RelationTrait for Relation {
@@ -109,9 +109,9 @@ impl RelationTrait for Relation {
                 .from(Column::DomainId)
                 .to(super::domain::Column::Domain)
                 .into(),
-            Self::User => Entity::belongs_to(super::user::Entity)
+            Self::Ip => Entity::belongs_to(super::ip::Entity)
                 .from(Column::Ip)
-                .to(super::user::Column::Ip)
+                .to(super::ip::Column::Ip)
                 .into(),
         }
     }
@@ -123,8 +123,8 @@ impl Related<super::domain::Entity> for Entity {
     }
 }
 
-impl Related<super::user::Entity> for Entity {
+impl Related<super::ip::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::User.def()
+        Relation::Ip.def()
     }
 }

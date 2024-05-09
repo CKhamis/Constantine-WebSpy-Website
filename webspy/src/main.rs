@@ -8,10 +8,10 @@ use webspy::controller::controller_prelude::*;
 use webspy::controller::domain_controller::{all_domains, new_domain};
 use webspy::controller::report_controller::*;
 use webspy::controller::report_controller::{
-    get_report_by_domain, get_report_by_user, report_request,
+    get_report_by_domain, get_report_by_ip, report_request,
 };
-use webspy::controller::user_controller::*;
-use webspy::model::{domain, request, user};
+use webspy::controller::ip_controller::*;
+use webspy::model::{domain, request, ip};
 
 use webspy::service::AppState;
 use webspy::util::template_config::template_resources;
@@ -58,7 +58,7 @@ async fn main() -> std::io::Result<()> {
             );
         }
     }
-    let ban_table = builder.build(&schema.create_table_from_entity(user::Entity));
+    let ban_table = builder.build(&schema.create_table_from_entity(ip::Entity));
     match connection.execute(ban_table).await {
         Ok(_) => {
             println!("Creating new table: ban");
@@ -97,14 +97,14 @@ async fn main() -> std::io::Result<()> {
             .service(new_domain)
             .service(all_domains)
             .service(report_request)
-            .service(get_banned_users)
-            .service(get_all_users_by_activity)
-            .service(get_all_users)
+            .service(get_banned_ips)
+            .service(get_all_ip_by_activity)
+            .service(get_all_ips)
             .service(daily_requests)
             .service(daily_requests_by_user)
             .service(domain_requests)
             .service(domain_requests_by_user)
-            .service(get_report_by_user)
+            .service(get_report_by_ip)
             .service(get_report_by_domain)
             .service(get_endpoint_frequency_by_user)
             .service(get_endpoint_frequency)

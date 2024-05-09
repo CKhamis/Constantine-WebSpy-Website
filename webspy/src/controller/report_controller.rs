@@ -3,12 +3,12 @@ use actix_web::{get, post, web, HttpResponse, Responder};
 use sqlx::types::chrono::Local;
 
 use crate::data_transfer_object::ban_response::BanResponse;
-use crate::data_transfer_object::new_user::NewUser;
+use crate::data_transfer_object::new_ip::newIp;
 use crate::data_transfer_object::report::Report;
 use crate::service::report_service::{
-    all_reports, find_by_domain, find_by_user, save_request, verify_domain,
+    all_reports, find_by_domain, find_by_ip, save_request, verify_domain,
 };
-use crate::service::user_service::{new_user, user_check};
+use crate::service::ip_service::{new_ip, ip_check};
 use crate::service::AppState;
 
 #[post("/report")]
@@ -25,26 +25,26 @@ pub async fn report_request(
     }
 
     println!(
-        "User exists in database: {:?}",
-        user_check(&report.ip, &app_state).await
+        "ip exists in database: {:?}",
+        ip_check(&report.ip, &app_state).await
     );
 
-    // Check if user already exists in database and create if it doesn't
-    match user_check(&report.ip, &app_state).await.map_or(None, |a| a) {
+    // Check if ip already exists in database and create if it doesn't
+    match ip_check(&report.ip, &app_state).await.map_or(None, |a| a) {
         None => {
-            // user does not exist, create it
-            let user = NewUser {
+            // ip does not exist, create it
+            let ip = newIp {
                 expire: None,
                 ip: report.ip.clone(),
                 message: None,
             };
 
-            // Save user
-            match new_user(user, &app_state).await {
+            // Save ip
+            match new_ip(ip, &app_state).await {
                 Ok(_) => {
                     let best_response = BanResponse {
                         is_blocked: false,
-                        message: "User is not banned.".to_string(),
+                        message: "Ip is not banned.".to_string(),
                         expire: Local::now(),
                     };
 
@@ -70,14 +70,14 @@ pub async fn report_request(
                 }
             }
         }
-        Some(user) => {
-            // user exists
-            if let Some(expire_date) = user.expire {
+        Some(ip) => {
+            // Ip exists
+            if let Some(expire_date) = ip.expire {
                 if expire_date > Local::now() {
-                    // user is banned
+                    // Ip is banned
                     let bad_response = BanResponse {
                         is_blocked: true,
-                        message: user.reason.unwrap_or("No reason given".to_string()),
+                        message: ip.reason.unwrap_or("No reason given".to_string()),
                         expire: expire_date,
                     };
 
@@ -96,12 +96,12 @@ pub async fn report_request(
                         .insert_header(ContentType::json())
                         .body(ser_response)
                 } else {
-                    // user was seen before, but is not banned
+                    // Ip was seen before, but is not banned
                     let ok_response = BanResponse {
                         is_blocked: false,
                         message: format!(
-                            "User is not banned anymore. Old reason: {}",
-                            user.reason.unwrap_or("No reason given".to_string())
+                            "Ip is not banned anymore. Old reason: {}",
+                            ip.reason.unwrap_or("No reason given".to_string())
                         ),
                         expire: expire_date,
                     };
@@ -122,10 +122,10 @@ pub async fn report_request(
                         .body(ser_response)
                 }
             } else {
-                // User was never banned
+                // Ip was never banned
                 let ok_response = BanResponse {
                     is_blocked: false,
-                    message: "User was not banned".to_string(),
+                    message: "Ip was not banned".to_string(),
                     expire: Local::now(),
                 };
 
@@ -149,21 +149,21 @@ pub async fn report_request(
 
 #[get("/api/report/all")]
 pub async fn get_all_reports(db: web::Data<AppState>) -> impl Responder {
-    let all_users = all_reports(&db.conn).await;
-    match serde_json::to_string(&all_users) {
+    let all_ips = all_reports(&db.conn).await;
+    match serde_json::to_string(&all_ips) {
         Ok(response) => HttpResponse::Ok()
             .insert_header(ContentType::json())
             .body(response),
-        Err(_) => HttpResponse::BadRequest().body("There was an error serializing user list"),
+        Err(_) => HttpResponse::BadRequest().body("There was an error serializing ip list"),
     }
 }
 
-#[get("/api/report/user/{ip}")]
-pub async fn get_report_by_user(
+#[get("/api/report/ip/{ip}")]
+pub async fn get_report_by_ip(
     ip_address: web::Path<String>,
     app_state: web::Data<AppState>,
 ) -> impl Responder {
-    match serde_json::to_string(&find_by_user(&ip_address, &app_state.conn).await) {
+    match serde_json::to_string(&find_by_ip(&ip_address, &app_state.conn).await) {
         Ok(response) => HttpResponse::Ok()
             .insert_header(ContentType::json())
             .body(response),
