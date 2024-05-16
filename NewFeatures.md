@@ -22,6 +22,9 @@ The domain details screen was never finished, so not much needs to be changed. M
 
 ## Changes to reports
 This includes sweeping changes to the handing of incoming reports/request info coming from web servers.
+### Model Changes
+- Upon request, useragent info will be parsed and set into individual cells in addition to the useragent string
+  - usparser or fast_uaparser
 ### Report search (new)
 - Filter by useragent info
     - device
